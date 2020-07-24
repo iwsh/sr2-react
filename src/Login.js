@@ -12,6 +12,7 @@ import {
   CInputGroup,
   CInputGroupPrepend,
   CInputGroupText,
+  CPopover,
   CRow
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
@@ -26,7 +27,7 @@ class Login extends Component {
             <CCardGroup>
               <CCard className="p-4">
                 <CCardBody>
-                  <CForm>
+                  <CForm className="needs-validation">
                     <h1>Login</h1>
                     <p className="text-muted">Sign In to your account</p>
                     <CInputGroup className="mb-3">
@@ -35,7 +36,7 @@ class Login extends Component {
                           <CIcon name="cil-user" />
                         </CInputGroupText>
                       </CInputGroupPrepend>
-                      <CInput type="text" placeholder="Username" autoComplete="username" />
+                      <CInput type="email" className="form-control" placeholder="email" autoComplete="email" required />
                     </CInputGroup>
                     <CInputGroup className="mb-4">
                       <CInputGroupPrepend>
@@ -43,14 +44,23 @@ class Login extends Component {
                           <CIcon name="cil-lock-locked" />
                         </CInputGroupText>
                       </CInputGroupPrepend>
-                      <CInput type="password" placeholder="Password" autoComplete="current-password" />
+                      <CInput type="password" className="form-control" placeholder="password" autoComplete="password" required />
                     </CInputGroup>
                     <CRow>
                       <CCol xs="6">
-                        <CButton color="primary" className="px-4">Login</CButton>
+                        <CButton color="primary" className="px-4" type="submit">Login</CButton>
                       </CCol>
                       <CCol xs="6" className="text-right">
-                        <CButton color="link" className="px-0">Forgot password?</CButton>
+                        <CPopover header="Forgot password?"
+                          content={`Please send your e-mail to the e-mail address symitems.info@gmail.com.`}
+                          placement="bottom"
+                          interactive={true}
+                          trigger="click"
+                        >
+                          <CButton color="link" className="px-0">
+                            Forgot password?
+                          </CButton>
+                        </CPopover>
                       </CCol>
                     </CRow>
                   </CForm>
@@ -60,11 +70,8 @@ class Login extends Component {
                 <CCardBody className="text-center">
                   <div>
                     <h2>Sign up</h2>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut
-                      labore et dolore magna aliqua.</p>
-                    <Link to="/register">
-                      <CButton color="primary" className="mt-3" active tabIndex={-1}>Register Now!</CButton>
-                    </Link>
+                    <p>If you want to create a new account, please send your e-mail to the e-mail address below.</p>
+                    <p>symitems.info@gmail.com</p>
                   </div>
                 </CCardBody>
               </CCard>
