@@ -10,9 +10,6 @@ import {
   CForm,
   CFormGroup,
   CInput,
-  CInputGroup,
-  CInputGroupPrepend,
-  CInputGroupText,
   CInvalidFeedback,
   CLabel,
   CPopover,
@@ -32,6 +29,9 @@ class Login extends Component {
       password: '',
       isLoggedIn: false,
       data: [],
+      error: '',
+      emailChecked: false,
+      passwordChecked: false,
     };
   }
 
@@ -60,6 +60,30 @@ class Login extends Component {
             });
           };
         },)
+        .catch((error) => {
+          if (error.response) {
+            // このリクエストはステータスコードとともに作成されます
+            // 2xx系以外の時にエラーが発生します
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            if (error.response.status == '400') {
+              this.setState({ error: 'Email と Password は入力必須です。' })
+            } else if (error.response.status == '401') {
+              this.setState({ error: 'Email または Password が違います。' })
+            } else if (error.response.status == '423') {
+              this.setState({ error: 'アカウントロックされています。解除するためには、管理者に問い合わせてください。' })
+            }
+          } else if (error.request) {
+            // このリクエストはレスポンスが返ってこない時に作成されます。
+            // `error.request`はXMLHttpRequestのインスタンスです。
+            console.log(error.request);
+          } else {
+            //それ以外で何か以上が起こった時
+            console.log('Error', error.message);
+          }
+          console.log(error.config);
+        });
     } else {
       // エラーメッセージ（バリデーション）
     }
@@ -75,7 +99,7 @@ class Login extends Component {
 
   render() {
     return (
-      (this.state.isLoggedIn == true)? (
+      (this.state.isLoggedIn === true)? (
         <Redirect to={{
           pathname: '/calendar',
           state: { data: this.state.data }
@@ -94,24 +118,29 @@ class Login extends Component {
               <CCardGroup>
                 <CCard className="p-4">
                   <CCardBody>
-                    <CForm className="was-validated">
+                  {this.state.error != '' && <p style={{color:'#ff0000'}}>{this.state.error}</p>}
+                    <CForm>
                       <h1>Login</h1>
                       <p className="text-muted">Sign In to your account</p>
-                      <CFormGroup>
+                      <CFormGroup className={this.state.emailChecked && "was-validated"}>
                         <CLabel htmlFor="inputWarning1i">email</CLabel>
-                        <CInput type="email" className="form-control-warning" id="inputWarning1i" placeholder="email" value={this.state.email} onChange={this.changeLoginEmail.bind(this)} autoComplete="email" required />
+                        <CInput type="email" className="form-control-warning" id="inputWarning1i" placeholder="email" value={this.state.email} onChange={this.changeLoginEmail.bind(this)} onBlur={() => this.setState({emailChecked: true})} autoComplete="email" required />
                         <CInvalidFeedback className="help-block">
-                          Neccessary & E-mail format
+                          Neccessary & Needed E-mail format
                         </CInvalidFeedback>
-                        <CValidFeedback className="help-block">OK</CValidFeedback>
+                        <CValidFeedback className="help-block">
+                          OK
+                        </CValidFeedback>
                       </CFormGroup>
-                      <CFormGroup>
+                      <CFormGroup className={this.state.passwordChecked && "was-validated"}>
                         <CLabel htmlFor="inputWarning2i">password</CLabel>
-                        <CInput type="password" className="form-control-warning" id="inputWarning2i" placeholder="password" value={this.state.password} onChange={this.changeLoginPassword.bind(this)} autoComplete="password" required />
+                        <CInput type="password" className="form-control-warning" id="inputWarning2i" placeholder="password" value={this.state.password} onChange={this.changeLoginPassword.bind(this)} onBlur={() => this.setState({passwordChecked: true})} autoComplete="password" required />
                         <CInvalidFeedback className="help-block">
                           Neccessary
                         </CInvalidFeedback>
-                        <CValidFeedback className="help-block">OK</CValidFeedback>
+                        <CValidFeedback className="help-block">
+                          OK
+                        </CValidFeedback>
                       </CFormGroup>
                       <CRow>
                         <CCol xs="6">
