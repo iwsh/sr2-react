@@ -10,8 +10,10 @@ import {
   CForm,
   CFormGroup,
   CInput,
+  CInputGroup,
+  CInputGroupPrepend,
+  CInputGroupText,
   CInvalidFeedback,
-  CLabel,
   CPopover,
   CRow,
   CValidFeedback
@@ -123,24 +125,36 @@ class Login extends Component {
                       <h1>Login</h1>
                       <p className="text-muted">Sign In to your account</p>
                       <CFormGroup className={this.state.emailChecked && "was-validated"}>
-                        <CLabel htmlFor="inputWarning1i">email</CLabel>
-                        <CInput type="email" className="form-control-warning" id="inputWarning1i" placeholder="email" value={this.state.email} onChange={this.changeLoginEmail.bind(this)} onBlur={() => this.setState({emailChecked: true})} autoComplete="email" required />
-                        <CInvalidFeedback className="help-block">
-                          Neccessary & Needed E-mail format
-                        </CInvalidFeedback>
-                        <CValidFeedback className="help-block">
-                          OK
-                        </CValidFeedback>
+                        <CInputGroup className="mb-3">
+                          <CInputGroupPrepend>
+                            <CInputGroupText>
+                              <CIcon name="cil-user" />
+                            </CInputGroupText>
+                          </CInputGroupPrepend>
+                          <CInput type="email" className="form-control-warning" id="inputWarning1i" placeholder="email" value={this.state.email} onChange={this.changeLoginEmail.bind(this)} onBlur={() => this.setState({emailChecked: true})} autoComplete="email" required />
+                          <CInvalidFeedback className="help-block">
+                            Neccessary & Needed E-mail format
+                          </CInvalidFeedback>
+                          <CValidFeedback className="help-block">
+                            OK
+                          </CValidFeedback>
+                        </CInputGroup>
                       </CFormGroup>
                       <CFormGroup className={this.state.passwordChecked && "was-validated"}>
-                        <CLabel htmlFor="inputWarning2i">password</CLabel>
-                        <CInput type="password" className="form-control-warning" id="inputWarning2i" placeholder="password" value={this.state.password} onChange={this.changeLoginPassword.bind(this)} onBlur={() => this.setState({passwordChecked: true})} autoComplete="password" required />
-                        <CInvalidFeedback className="help-block">
-                          Neccessary
-                        </CInvalidFeedback>
-                        <CValidFeedback className="help-block">
-                          OK
-                        </CValidFeedback>
+                        <CInputGroup className="mb-4">
+                          <CInputGroupPrepend>
+                            <CInputGroupText>
+                              <CIcon name="cil-lock-locked" />
+                            </CInputGroupText>
+                          </CInputGroupPrepend>
+                          <CInput type="password" className="form-control-warning" id="inputWarning2i" placeholder="password" value={this.state.password} onChange={this.changeLoginPassword.bind(this)} onBlur={() => this.setState({passwordChecked: true})} autoComplete="password" required />
+                          <CInvalidFeedback className="help-block">
+                            Neccessary
+                          </CInvalidFeedback>
+                          <CValidFeedback className="help-block">
+                            OK
+                          </CValidFeedback>
+                        </CInputGroup>
                       </CFormGroup>
                       <CRow>
                         <CCol xs="6">
