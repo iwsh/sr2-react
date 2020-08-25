@@ -75,14 +75,18 @@ class Login extends Component {
               this.setState({ error: 'Email または Password が違います。' })
             } else if (error.response.status == '423') {
               this.setState({ error: 'アカウントロックされています。解除するためには、管理者に問い合わせてください。' })
+            } else {
+              this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
             }
           } else if (error.request) {
             // このリクエストはレスポンスが返ってこない時に作成されます。
             // `error.request`はXMLHttpRequestのインスタンスです。
             console.log(error.request);
+            this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
           } else {
             //それ以外で何か以上が起こった時
             console.log('Error', error.message);
+            this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
           }
           console.log(error.config);
         });
