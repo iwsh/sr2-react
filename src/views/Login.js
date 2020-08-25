@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Redirect } from "react-router-dom";
+import { Redirect } from "react-router-dom"
 import {
   CButton,
   CCard,
@@ -19,13 +19,12 @@ import {
   CValidFeedback
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import axios from 'axios';
+import axios from 'axios'
 
 class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      color: 'dark',
       url_login: 'http://localhost:3001/login',
       email: '',
       password: '',
@@ -47,7 +46,8 @@ class Login extends Component {
     this.setState({ color: e.target.value });
   }
   login(email, password) {
-    if (this.validationCheck(email, password)) {
+    const error = this.validationCheck(email, password);
+    if (error == '') {
       axios
         .get(this.state.url_login, {
           headers: { "email": window.btoa(email), "password": window.btoa(password) },
@@ -87,16 +87,28 @@ class Login extends Component {
           console.log(error.config);
         });
     } else {
-      // エラーメッセージ（バリデーション）
+      this.setState({ error }); // validation NGのときのエラーメッセージ
     }
   }
   validationCheck(email, password) {
     const regex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-    if (email == '' || password == '' || !regex.test(email)){
-      return false
-    } else {
-      return true
+    let error = '';
+    if (  email == '' ) {
+      if ( password == '' ) {
+        error = 'Email と Password は入力必須です。';
+      } else {
+        error = 'Email は入力必須です。';
+      }
+    } else if ( !regex.test(email) ) {
+      if ( password == '' ) {
+        error = 'Email はメールアドレスのフォーマットが必須、Password は入力必須です。';
+      } else {
+        error = 'Email はメールアドレスのフォーマットが必須です。';
+      }
+    } else if ( password == '' ) {
+      error = 'Password は入力必須です。';
     }
+    return error
   }
 
   render() {
@@ -105,16 +117,10 @@ class Login extends Component {
         <Redirect to={{
           pathname: '/calendar',
           state: { data: this.state.data }
-        }}/>
+        }}/> // ログイン状態（認証OK）の場合はカレンダー画面に転送（ユーザデータを渡す）
       ) : (
       <div className="c-app c-default-layout flex-row align-items-center">
         <CContainer>
-          <select id="dropdown" onChange={this.handleDropdownChange.bind(this)}>
-            <option value="dark">Dark</option>
-            <option value="primary">Blue</option>
-            <option value="secondary">Gray</option>
-            <option value="danger">Red</option>
-          </select>
           <CRow className="justify-content-center">
             <CCol md="8">
               <CCardGroup>
@@ -158,7 +164,7 @@ class Login extends Component {
                       </CFormGroup>
                       <CRow>
                         <CCol xs="6">
-                          <CButton color={this.state.color} className="px-4" onClick={this.login.bind(this, this.state.email, this.state.password)} >Login</CButton>
+                          <CButton color="dark" className="px-4" onClick={this.login.bind(this, this.state.email, this.state.password)} >Login</CButton>
                         </CCol>
                         <CCol xs="6" className="text-right">
                           <CPopover header="Forgot password?"
@@ -176,7 +182,7 @@ class Login extends Component {
                     </CForm>
                   </CCardBody>
                 </CCard>
-                <CCard className={`text-white bg-${this.state.color} py-5 d-md-down-none`} style={{ width: '44%' }}>
+                <CCard className={`text-white bg-dark py-5 d-md-down-none`} style={{ width: '44%' }}>
                   <CCardBody className="text-center">
                     <div>
                       <h2>Sign up</h2>
