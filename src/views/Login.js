@@ -69,9 +69,7 @@ class Login extends Component {
             console.log(error.response.data);
             console.log(error.response.status);
             console.log(error.response.headers);
-            if (error.response.status == '400') {
-              this.setState({ error: 'Email と Password は入力必須です。' })
-            } else if (error.response.status == '401') {
+            if (error.response.status == '401') {
               this.setState({ error: 'Email または Password が違います。' })
             } else if (error.response.status == '423') {
               this.setState({ error: 'アカウントロックされています。解除するためには、管理者に問い合わせてください。' })
