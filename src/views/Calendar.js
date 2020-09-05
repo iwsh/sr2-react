@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 
+// ログイン確認用コード
+
 class Calendar extends Component {
   constructor(props) {
     super(props);
