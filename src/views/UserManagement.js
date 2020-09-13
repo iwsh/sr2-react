@@ -105,8 +105,8 @@ class UserManagement extends Component {
       axios
         .patch(this.state.url + "/" + this.state.targetUser.id, this.state.targetUser)
         .then(() => {
-        this.getUserList();
-        this.setState({ editModal: !this.state.editModal });
+          this.getUserList();
+          this.setState({ editModal: !this.state.editModal });
         })
         .catch((error) => {
           if (error.response) {
@@ -125,7 +125,7 @@ class UserManagement extends Component {
           }
         });
     } else {
-      this.setState({ messages: [...this.state.messages, "入力情報が正しくありません"] });
+      // this.setState({ messages: [...this.state.messages, "入力情報が正しくありません"] });
     }
   }
 
@@ -165,49 +165,55 @@ class UserManagement extends Component {
     }
   }
 
-  displayAdmin(is_admin){
-    if (is_admin) return "Admin";else return "Normal";
+  displayAdmin(is_admin) {
+    if (is_admin) return "Admin"; else return "Normal";
   }
 
   validiteTargetUser() {
+    var valid = true;
+    var messages = [];
     if (!this.state.targetUser.id && this.state.targetUser.id !== 0) {
-      this.setState({ messages: [...this.state.messages, "Validation: ID is invaild"] });
+      messages = [...messages, "Validation: ID is invaild"];
+      valid = false
     }
     if (!this.state.targetUser.name) {
-      this.setState({ messages: [...this.state.messages, "Validation: name is invaild"] });
+      messages = [...messages, "Validation: Name is invaild"];
+      valid = false
     }
     if (this.state.targetUser.is_admin == null) {
-      this.setState({ messages: [...this.state.messages, "Validation: admin flag is invalid"] });
+      messages = [...messages, "Validation: User Type is invalid"];
+      valid = false
     }
     if (!this.state.targetUser.email) {
-      this.setState({ messages: [...this.state.messages, "Validation: email is invaild"] });
+      valid = false
+      messages = [...messages, "Validation: Email is invalid"];
     }
 
-    if (this.state.messages.length &&
-      this.state.messages[0].indexOf("Validation: ") === 0) return false;
-    return true;
+    this.setState({ messages: messages });
+    if (valid) return true;
+    return false;
   }
 
   handleChangeName(event) {
-    var newTargetUser = {...this.state.targetUser};
+    var newTargetUser = { ...this.state.targetUser };
     newTargetUser.name = event.target.value;
-    this.setState({ targetUser: newTargetUser});
+    this.setState({ targetUser: newTargetUser });
   }
 
   handleChangeEmail(event) {
-    var newTargetUser = {...this.state.targetUser};
+    var newTargetUser = { ...this.state.targetUser };
     newTargetUser.email = event.target.value;
     this.setState({ targetUser: newTargetUser });
   }
 
   handleChangeIsAdmin(event) {
-    var newTargetUser = {...this.state.targetUser};
+    var newTargetUser = { ...this.state.targetUser };
     newTargetUser.is_admin = event.target.value;
     this.setState({ targetUser: newTargetUser });
   }
 
   handleChangePassword(event) {
-    var newTargetUser = {...this.state.targetUser};
+    var newTargetUser = { ...this.state.targetUser };
     newTargetUser.password = event.target.value;
     this.setState({ targetUser: newTargetUser });
   }
@@ -332,7 +338,7 @@ class UserManagement extends Component {
           <CModalBody>
             <p>このユーザを編集します。</p>
             <CForm wasValidated>
-            <CFormGroup>
+              <CFormGroup>
                 <CLabel htmlFor="name">Name</CLabel>
                 <CInput
                   valid
@@ -345,6 +351,7 @@ class UserManagement extends Component {
               <CFormGroup>
                 <CLabel htmlFor="email">Email</CLabel>
                 <CInput
+                  type="email"
                   valid
                   id="email"
                   required
@@ -368,6 +375,7 @@ class UserManagement extends Component {
                 <CLabel htmlFor="password">Password</CLabel>
                 <CInput
                   valid
+                  type="password"
                   id="password"
                   placeholder="変更のない場合は入力不要"
                   value={this.state.targetUser.password}
