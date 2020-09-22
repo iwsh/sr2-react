@@ -20,7 +20,7 @@ import {
   CFormGroup,
   CLabel,
   CInput,
-  CSelect
+  CSelect,
 } from "@coreui/react";
 
 const ErrorMessage = (props) => {
@@ -48,8 +48,9 @@ class UserManagement extends Component {
       url: "http://localhost:3001/users",
       data: [],
       activeTab: -1,
-      deleteModal: false,
+      createModal: false,
       editModal: false,
+      deleteModal: false,
       messages: [],
       selectedUserInfo: null,
       targetUser: {},
@@ -103,7 +104,10 @@ class UserManagement extends Component {
     }
     if (this.validiteTargetUser()) {
       axios
-        .patch(this.state.url + "/" + this.state.targetUser.id, this.state.targetUser)
+        .patch(
+          this.state.url + "/" + this.state.targetUser.id,
+          this.state.targetUser
+        )
         .then(() => {
           this.getUserList();
           this.setState({ editModal: !this.state.editModal });
@@ -166,7 +170,8 @@ class UserManagement extends Component {
   }
 
   displayAdmin(is_admin) {
-    if (is_admin) return "Admin"; else return "Normal";
+    if (is_admin) return "Admin";
+    else return "Normal";
   }
 
   validiteTargetUser() {
@@ -174,18 +179,18 @@ class UserManagement extends Component {
     var messages = [];
     if (!this.state.targetUser.id && this.state.targetUser.id !== 0) {
       messages = [...messages, "Validation: ID is invaild"];
-      valid = false
+      valid = false;
     }
     if (!this.state.targetUser.name) {
       messages = [...messages, "Validation: Name is invaild"];
-      valid = false
+      valid = false;
     }
     if (this.state.targetUser.is_admin == null) {
       messages = [...messages, "Validation: User Type is invalid"];
-      valid = false
+      valid = false;
     }
     if (!this.state.targetUser.email) {
-      valid = false
+      valid = false;
       messages = [...messages, "Validation: Email is invalid"];
     }
 
@@ -246,6 +251,18 @@ class UserManagement extends Component {
                           </CListGroupItem>
                         );
                       })}
+                      <CListGroupItem
+                        onClick={() =>
+                          this.setState({
+                            activeTab: -1,
+                            messages: [],
+                            createModal: !this.state.createModal,
+                          })
+                        }
+                        active={this.state.activeTab === userInfo.id}
+                      >
+                        + ユーザを追加
+                      </CListGroupItem>
                     </CListGroup>
                   </CCol>
                   <CCol xs="8">
@@ -258,7 +275,9 @@ class UserManagement extends Component {
                             <p>ID: {userInfo.id}</p>
                             <p>Name: {userInfo.name}</p>
                             <p>E-mail: {userInfo.email}</p>
-                            <p>UserType: {this.displayAdmin(userInfo.is_admin)}</p>
+                            <p>
+                              UserType: {this.displayAdmin(userInfo.is_admin)}
+                            </p>
                             <CButton
                               color="dark"
                               onClick={() =>
@@ -393,6 +412,78 @@ class UserManagement extends Component {
               color="secondary"
               onClick={() =>
                 this.setState({ editModal: !this.state.editModal })
+              }
+            >
+              Cancel
+            </CButton>
+          </CModalFooter>
+        </CModal>
+        <CModal
+          show={this.state.createModal}
+          onClose={() => this.setState({ createModal: !this.state.createModal })}
+          color="dark"
+        >
+          <CModalHeader closeButton>
+            <CModalTitle>ユーザ新規作成</CModalTitle>
+          </CModalHeader>
+          <CModalBody>
+            <p>このユーザを編集します。</p>
+            <CForm wasValidated>
+              <CFormGroup>
+                <CLabel htmlFor="name">Name</CLabel>
+                <CInput
+                  valid
+                  id="name"
+                  required
+                  value={this.state.targetUser.name}
+                  onChange={this.handleChangeName.bind(this)}
+                />
+              </CFormGroup>
+              <CFormGroup>
+                <CLabel htmlFor="email">Email</CLabel>
+                <CInput
+                  type="email"
+                  valid
+                  id="email"
+                  required
+                  value={this.state.targetUser.email}
+                  onChange={this.handleChangeEmail.bind(this)}
+                />
+              </CFormGroup>
+              <CFormGroup>
+                <CLabel htmlFor="is_admin">User Type</CLabel>
+                <CSelect
+                  valid
+                  id="is_admin"
+                  value={this.state.targetUser.is_admin}
+                  onChange={this.handleChangeIsAdmin.bind(this)}
+                >
+                  <option value="true">Admin</option>
+                  <option value="false">Normal</option>
+                </CSelect>
+              </CFormGroup>
+              <CFormGroup>
+                <CLabel htmlFor="password">Password</CLabel>
+                <CInput
+                  valid
+                  type="password"
+                  id="password"
+                  placeholder="変更のない場合は入力不要"
+                  value={this.state.targetUser.password}
+                  onChange={this.handleChangePassword.bind(this)}
+                />
+              </CFormGroup>
+            </CForm>
+            <ErrorMessage message={[this.state.messages]} />
+          </CModalBody>
+          <CModalFooter>
+            <CButton color="dark" onClick={() => this.editUser()}>
+              Edit User
+            </CButton>{" "}
+            <CButton
+              color="secondary"
+              onClick={() =>
+                this.setState({ createModal: !this.state.createModal })
               }
             >
               Cancel
