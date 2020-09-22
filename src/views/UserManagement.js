@@ -47,7 +47,7 @@ class UserManagement extends Component {
     this.state = {
       url: "http://localhost:3001/users",
       data: [],
-      activeTab: -1,
+      activeTab: -127,
       createModal: false,
       editModal: false,
       deleteModal: false,
@@ -72,29 +72,37 @@ class UserManagement extends Component {
     });
   }
 
-  postUser(userInfo) {
-    axios
-      .post(this.state.url_users, userInfo)
-      .then(() => {
-        this.getUserList();
-        this.setState({ postModal: !this.state.deleteModal });
-      })
-      .catch((error) => {
-        if (error.response) {
-          // The request was made and the server responded with a status code
-          // that falls out of the range of 2xx
-          console.log(error.response.data);
-          console.log(error.response.status); // 例：400
-          console.log(error.response.statusText); // Bad Request
-          console.log(error.response.headers);
+  createUser() {
+    this.setState({ messages: [] });
+    if (this.validiteTargetUser("post")) {
+      axios
+        .post(
+          this.state.url,
+          this.state.targetUser
+        )
+        .then(() => {
           this.getUserList();
-          this.setState({ deleteModal: !this.state.deleteModal });
-          this.setState({ messages: ["Error"] });
-        } else {
-          this.setState({ messages: ["Error"] });
-          console.log(error);
-        }
-      });
+          this.setState({ editModal: !this.state.editModal });
+        })
+        .catch((error) => {
+          if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            console.log(error.response.data);
+            console.log(error.response.status); // 例：400
+            console.log(error.response.statusText); // Bad Request
+            console.log(error.response.headers);
+            this.getUserList();
+            this.setState({ createModal: !this.state.createModal });
+            this.setState({ messages: ["Error"] });
+          } else {
+            this.setState({ messages: ["Error"] });
+            console.log(error);
+          }
+        });
+    } else {
+      // this.setState({ messages: [...this.state.messages, "入力情報が正しくありません"] });
+    }
   }
 
   editUser() {
@@ -102,7 +110,7 @@ class UserManagement extends Component {
     if (!this.state.targetUser.password) {
       delete this.state.targetUser.password;
     }
-    if (this.validiteTargetUser()) {
+    if (this.validiteTargetUser("edit")) {
       axios
         .patch(
           this.state.url + "/" + this.state.targetUser.id,
@@ -121,7 +129,7 @@ class UserManagement extends Component {
             console.log(error.response.statusText); // Bad Request
             console.log(error.response.headers);
             this.getUserList();
-            this.setState({ deleteModal: !this.state.deleteModal });
+            this.setState({ editModal: !this.state.editModal });
             this.setState({ messages: ["Error"] });
           } else {
             this.setState({ messages: ["Error"] });
@@ -174,24 +182,36 @@ class UserManagement extends Component {
     else return "Normal";
   }
 
-  validiteTargetUser() {
+  validiteTargetUser(method) {
     var valid = true;
     var messages = [];
     if (!this.state.targetUser.id && this.state.targetUser.id !== 0) {
-      messages = [...messages, "Validation: ID is invaild"];
+      messages = [...messages, "Validation: ID is invaild."];
       valid = false;
     }
     if (!this.state.targetUser.name) {
-      messages = [...messages, "Validation: Name is invaild"];
+      messages = [...messages, "Validation: Name is invaild."];
       valid = false;
     }
     if (this.state.targetUser.is_admin == null) {
-      messages = [...messages, "Validation: User Type is invalid"];
+      messages = [...messages, "Validation: User Type is invalid."];
       valid = false;
     }
     if (!this.state.targetUser.email) {
       valid = false;
-      messages = [...messages, "Validation: Email is invalid"];
+      messages = [...messages, "Validation: Email is invalid."];
+    }
+    if (method === "post"){
+      if (!this.state.targetUser.password) {
+        valid = false;
+        messages = [...messages, "Validation: Password is invalid."];
+      // TODO: 確認用PW実装（POST）
+      // } elif (this.state.targetUser.password !== this.state.targetUser.password2){
+      //   valid = false;
+      //   messages = [...messages, "Validation: Password is not same with Password Confirmation."];
+      }
+    // } elif (method === "patch") { //TODO: 確認用PW実装（PATCH）
+      // PW confirmation for patch
     }
 
     this.setState({ messages: messages });
@@ -257,9 +277,10 @@ class UserManagement extends Component {
                             activeTab: -1,
                             messages: [],
                             createModal: !this.state.createModal,
+                            targetUser: {},
                           })
                         }
-                        active={this.state.activeTab === userInfo.id}
+                        active={this.state.activeTab === -1}
                       >
                         + ユーザを追加
                       </CListGroupItem>
@@ -421,13 +442,13 @@ class UserManagement extends Component {
         <CModal
           show={this.state.createModal}
           onClose={() => this.setState({ createModal: !this.state.createModal })}
-          color="dark"
+          color="primary"
         >
           <CModalHeader closeButton>
             <CModalTitle>ユーザ新規作成</CModalTitle>
           </CModalHeader>
           <CModalBody>
-            <p>このユーザを編集します。</p>
+            <p>新しいユーザを追加します。</p>
             <CForm wasValidated>
               <CFormGroup>
                 <CLabel htmlFor="name">Name</CLabel>
@@ -466,9 +487,9 @@ class UserManagement extends Component {
                 <CLabel htmlFor="password">Password</CLabel>
                 <CInput
                   valid
+                  required
                   type="password"
                   id="password"
-                  placeholder="変更のない場合は入力不要"
                   value={this.state.targetUser.password}
                   onChange={this.handleChangePassword.bind(this)}
                 />
@@ -477,11 +498,11 @@ class UserManagement extends Component {
             <ErrorMessage message={[this.state.messages]} />
           </CModalBody>
           <CModalFooter>
-            <CButton color="dark" onClick={() => this.editUser()}>
-              Edit User
+            <CButton color="dark" onClick={() => this.createUser()}>
+              Create User
             </CButton>{" "}
             <CButton
-              color="secondary"
+              color="primary"
               onClick={() =>
                 this.setState({ createModal: !this.state.createModal })
               }
