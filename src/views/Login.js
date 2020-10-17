@@ -39,12 +39,11 @@ class Login extends Component {
   changeLoginEmail(e) {
     this.setState({email: e.target.value});
   }
+
   changeLoginPassword(e) {
     this.setState({password: e.target.value});
   }
-  handleDropdownChange(e) {
-    this.setState({ color: e.target.value });
-  }
+
   login(email, password) {
     const error = this.validationCheck(email, password);
     if (error == '') {
@@ -55,12 +54,10 @@ class Login extends Component {
         })
         .then((results) => {
           console.log(results.data);
-          if (typeof results.data.message == "undefined") {
-            this.setState({
-              data: results.data,
-              isLoggedIn: true,
-            });
-          };
+          this.setState({
+            data: results.data,
+            isLoggedIn: true,
+          });
         },)
         .catch((error) => {
           if (error.response) {
@@ -92,6 +89,7 @@ class Login extends Component {
       this.setState({ error }); // validation NGのときのエラーメッセージ
     }
   }
+
   validationCheck(email, password) {
     const regex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
     let error = '';
@@ -116,10 +114,11 @@ class Login extends Component {
   render() {
     return (
       (this.state.isLoggedIn === true)? (
+        // ログイン状態（認証OK）の場合はカレンダー画面に転送（ユーザデータを渡す）
         <Redirect to={{
           pathname: '/calendar',
-          state: { data: this.state.data }
-        }}/> // ログイン状態（認証OK）の場合はカレンダー画面に転送（ユーザデータを渡す）
+          state: { data: this.state.data, email: this.state.email, password: this.state.password }
+        }}/>
       ) : (
       <div className="c-app c-default-layout flex-row align-items-center">
         <CContainer>
