@@ -54,6 +54,7 @@ class UserManagement extends Component {
       messages: [],
       selectedUserInfo: null,
       targetUser: {},
+      blankUser: {name: "", email: "", is_admin: false, password: ""},
     };
     this.getUserList();
   }
@@ -185,9 +186,11 @@ class UserManagement extends Component {
   validiteTargetUser(method) {
     var valid = true;
     var messages = [];
-    if (!this.state.targetUser.id && this.state.targetUser.id !== 0) {
-      messages = [...messages, "Validation: ID is invaild."];
-      valid = false;
+    if (method !== "post"){
+      if (!this.state.targetUser.id && this.state.targetUser.id !== 0) {
+        messages = [...messages, "Validation: ID is invaild."];
+        valid = false;
+      }
     }
     if (!this.state.targetUser.name) {
       messages = [...messages, "Validation: Name is invaild."];
@@ -276,8 +279,8 @@ class UserManagement extends Component {
                           this.setState({
                             activeTab: -1,
                             messages: [],
+                            targetUser: this.state.blankUser,
                             createModal: !this.state.createModal,
-                            targetUser: {},
                           })
                         }
                         active={this.state.activeTab === -1}
@@ -498,11 +501,11 @@ class UserManagement extends Component {
             <ErrorMessage message={[this.state.messages]} />
           </CModalBody>
           <CModalFooter>
-            <CButton color="dark" onClick={() => this.createUser()}>
+            <CButton color="primary" onClick={() => this.createUser()}>
               Create User
             </CButton>{" "}
             <CButton
-              color="primary"
+              color="dark"
               onClick={() =>
                 this.setState({ createModal: !this.state.createModal })
               }
