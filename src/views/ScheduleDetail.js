@@ -39,7 +39,7 @@ class ScheduleDetail extends Component {
     const deleteSchedules = () => {
       axios
         .delete(this.props.url_schedules + '/' + this.props.item.id, {
-          headers: { "email": window.btoa(this.props.email), "password": window.btoa(this.props.password) },
+          headers: { "AuthHeader": window.btoa(this.props.email + ":" + this.props.password) },
           data: {}
         })
         .then((results) => {
@@ -84,7 +84,7 @@ class ScheduleDetail extends Component {
     const putSchedules = () => {
       axios
       .put(this.props.url_schedules + '/' + this.props.item.id, this.state.putdata, {
-        headers: { "email": window.btoa(this.props.email), "password": window.btoa(this.props.password) }
+        headers: { "AuthHeader": window.btoa(this.props.email + ":" + this.props.password) }
       })
       .then((results) => {
         console.log(results.data);

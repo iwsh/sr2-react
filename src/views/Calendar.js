@@ -66,7 +66,7 @@ class Calendar extends Component {
       if (year !== '' && month !== '') {
         axios
           .get(this.state.url_schedules + '/' + year + '/' + month, {
-            headers: { "email": window.btoa(this.state.email), "password": window.btoa(this.state.password) },
+            headers: { "AuthHeader": window.btoa(this.state.email + ":" + this.state.password) },
             data: {}
           })
           .then((results) => {
@@ -217,7 +217,7 @@ class Calendar extends Component {
     const postSchedules = () => {
       axios
         .post(this.state.url_schedules, this.state.postdata, {
-          headers: { "email": window.btoa(this.state.email), "password": window.btoa(this.state.password) }
+          headers: { "AuthHeader": window.btoa(this.state.email + ":" + this.state.password) }
         })
         .then((results) => {
           console.log(results.data);
