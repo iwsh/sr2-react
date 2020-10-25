@@ -83,7 +83,7 @@ class UserManagement extends Component {
         )
         .then(() => {
           this.getUserList();
-          this.setState({ editModal: !this.state.editModal });
+          this.setState({ createModal: !this.state.createModal });
         })
         .catch((error) => {
           if (error.response) {
