@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Redirect } from "react-router-dom"
+import { useDispatch } from 'react-redux';
 import {
   CButton,
   CCard,
@@ -23,6 +24,7 @@ import axios from 'axios'
 
 class Login extends Component {
   constructor(props) {
+    const dispatch = useDispatch();
     super(props);
     this.state = {
       url_login: 'http://localhost:3001/login',
@@ -110,6 +112,8 @@ class Login extends Component {
     }
     return error
   }
+
+  useDispatch() {}
 
   render() {
     return (
