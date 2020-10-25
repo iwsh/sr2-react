@@ -47,6 +47,8 @@ class UserManagement extends Component {
     this.state = {
       url: "http://localhost:3001/users",
       data: [],
+      email: 'gerounnko@gmail.com',
+      password: 'gerounnko',
       activeTab: -127,
       createModal: false,
       editModal: false,
@@ -60,7 +62,15 @@ class UserManagement extends Component {
   }
 
   getUserList() {
-    axios.get(this.state.url).then((results) => {
+    axios.get(
+      this.state.url,
+      {
+        headers: {
+          "email": window.btoa(this.state.email),
+          "password": window.btoa(this.state.password)
+        }
+      }
+    ).then((results) => {
       this.setState({
         data: results.data,
       });
@@ -79,11 +89,16 @@ class UserManagement extends Component {
       axios
         .post(
           this.state.url,
-          this.state.targetUser
-        )
-        .then(() => {
+          this.state.targetUser,
+          {
+            headers: {
+              "email": window.btoa(this.state.email),
+              "password": window.btoa(this.state.password)
+            }
+          }
+        ).then(() => {
           this.getUserList();
-          this.setState({ createModal: !this.state.createModal });
+          this.setState({ createModal: false });
         })
         .catch((error) => {
           if (error.response) {
@@ -94,7 +109,6 @@ class UserManagement extends Component {
             console.log(error.response.statusText); // Bad Request
             console.log(error.response.headers);
             this.getUserList();
-            this.setState({ createModal: !this.state.createModal });
             this.setState({ messages: ["Error"] });
           } else {
             this.setState({ messages: ["Error"] });
@@ -115,11 +129,16 @@ class UserManagement extends Component {
       axios
         .patch(
           this.state.url + "/" + this.state.targetUser.id,
-          this.state.targetUser
-        )
-        .then(() => {
+          this.state.targetUser,
+          {
+            headers: {
+              "email": window.btoa(this.state.email),
+              "password": window.btoa(this.state.password)
+            }
+          }
+        ).then(() => {
           this.getUserList();
-          this.setState({ editModal: !this.state.editModal });
+          this.setState({ editModal: false });
         })
         .catch((error) => {
           if (error.response) {
@@ -130,7 +149,6 @@ class UserManagement extends Component {
             console.log(error.response.statusText); // Bad Request
             console.log(error.response.headers);
             this.getUserList();
-            this.setState({ editModal: !this.state.editModal });
             this.setState({ messages: ["Error"] });
           } else {
             this.setState({ messages: ["Error"] });
@@ -144,10 +162,17 @@ class UserManagement extends Component {
 
   deleteUser() {
     axios
-      .delete(this.state.url + "/" + this.state.targetUser.id)
-      .then(() => {
+      .delete(
+        this.state.url + "/" + this.state.targetUser.id,
+        {
+          headers: {
+            "email": window.btoa(this.state.email),
+            "password": window.btoa(this.state.password)
+          }
+        }
+      ).then(() => {
         this.getUserList();
-        this.setState({ deleteModal: !this.state.deleteModal });
+        this.setState({ deleteModal: false });
       })
       .catch((error) => {
         if (error.response) {
@@ -158,7 +183,6 @@ class UserManagement extends Component {
           console.log(error.response.statusText); // Bad Request
           console.log(error.response.headers);
           this.getUserList();
-          this.setState({ deleteModal: !this.state.deleteModal });
           this.setState({ messages: ["ユーザを削除できません"] });
         } else {
           this.setState({ messages: ["ユーザを削除できません"] });
@@ -187,24 +211,24 @@ class UserManagement extends Component {
     var valid = true;
     var messages = [];
     if (method !== "post"){
-      if (!this.state.targetUser.id && this.state.targetUser.id !== 0) {
+      if (!this.state.targetUser.id || this.state.targetUser.id === 0) {
         messages = [...messages, "Validation: ID is invaild."];
         valid = false;
       }
     }
-    if (!this.state.targetUser.name) {
-      messages = [...messages, "Validation: Name is invaild."];
-      valid = false;
-    }
-    if (this.state.targetUser.is_admin == null) {
-      messages = [...messages, "Validation: User Type is invalid."];
-      valid = false;
-    }
-    if (!this.state.targetUser.email) {
-      valid = false;
-      messages = [...messages, "Validation: Email is invalid."];
-    }
     if (method === "post"){
+      if (!this.state.targetUser.name) {
+        messages = [...messages, "Validation: Name is invaild."];
+        valid = false;
+      }
+      if (this.state.targetUser.is_admin == null) {
+        messages = [...messages, "Validation: User Type is invalid."];
+        valid = false;
+      }
+      if (!this.state.targetUser.email) {
+        valid = false;
+        messages = [...messages, "Validation: Email is invalid."];
+      }
       if (!this.state.targetUser.password) {
         valid = false;
         messages = [...messages, "Validation: Password is invalid."];
@@ -216,7 +240,6 @@ class UserManagement extends Component {
     // } elif (method === "patch") { //TODO: 確認用PW実装（PATCH）
       // PW confirmation for patch
     }
-
     this.setState({ messages: messages });
     if (valid) return true;
     return false;
@@ -244,6 +267,17 @@ class UserManagement extends Component {
     var newTargetUser = { ...this.state.targetUser };
     newTargetUser.password = event.target.value;
     this.setState({ targetUser: newTargetUser });
+  }
+
+  unlock() {
+    var newTargetUser = { ...this.filterUserById(
+      this.state.activeTab
+    ) };
+    newTargetUser.fails_count = 0;
+    this.setState({ targetUser: newTargetUser });
+    setTimeout(() => {
+      this.editUser();
+    }, 500);
   }
 
   render() {
@@ -331,6 +365,16 @@ class UserManagement extends Component {
                               className="mr-1"
                             >
                               Delete
+                            </CButton>
+                            <CButton
+                              color="light"
+                              onClick={() => {
+                                this.unlock()
+                              }}
+                              className="mr-1"
+                              style={userInfo.fails_count>=3 ? {} : {display: 'none'}}
+                            >
+                              Unlock
                             </CButton>
                           </CTabPane>
                         );
