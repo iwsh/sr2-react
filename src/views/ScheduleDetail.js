@@ -4,6 +4,7 @@ import axios from 'axios'
 import {
   CButton,
   CCardBody,
+  CCol,
   CForm,
   CFormGroup,
   CInput,
@@ -11,11 +12,13 @@ import {
   CInputGroupPrepend,
   CInputGroupText,
   CInvalidFeedback,
+  CLabel,
   CModal,
   CModalBody,
   CModalFooter,
   CModalHeader,
   CModalTitle,
+  CSwitch,
   CValidFeedback
 } from '@coreui/react'
 
@@ -27,7 +30,7 @@ class ScheduleDetail extends Component {
       date: new Date(),
       dailyData: [],
       error: '',
-      putdata: {date: this.props.item.date, title: this.props.item.title, started_at: this.props.item.started_at, ended_at: this.props.item.ended_at, detail: this.props.item.detail},
+      putdata: {date: this.props.item.date, title: this.props.item.title, started_at: this.props.item.started_at, ended_at: this.props.item.ended_at, allday: this.props.item.allday, detail: this.props.item.detail},
       editModal: false,
       deleteModal: false,
     };
@@ -133,24 +136,28 @@ class ScheduleDetail extends Component {
       })
     }
 
+    const changePutAllday = () => {
+      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, allday: !this.state.putdata.allday, detail: this.state.putdata.detail}});
+    }
+
     const changePutDate = (e) => {
-      this.setState({putdata: {date: e.target.value, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, detail: this.state.putdata.detail}});
+      this.setState({putdata: {date: e.target.value, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, allday: this.state.putdata.allday, detail: this.state.putdata.detail}});
     }
 
     const changePutTitle = (e) => {
-      this.setState({putdata: {date: this.state.putdata.date, title: e.target.value, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, detail: this.state.putdata.detail}});
+      this.setState({putdata: {date: this.state.putdata.date, title: e.target.value, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, allday: this.state.putdata.allday, detail: this.state.putdata.detail}});
     }
 
     const changePutStartedAt = (e) => {
-      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: e.target.value, ended_at: this.state.putdata.ended_at, detail: this.state.putdata.detail}});
+      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: e.target.value, ended_at: this.state.putdata.ended_at, allday: this.state.putdata.allday, detail: this.state.putdata.detail}});
     }
 
     const changePutEndedAt = (e) => {
-      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: e.target.value, detail: this.state.putdata.detail}});
+      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: e.target.value, allday: this.state.putdata.allday, detail: this.state.putdata.detail}});
     }
 
     const changePutDetail = (e) => {
-      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, detail: e.target.value}});
+      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, allday: this.state.putdata.allday, detail: e.target.value}});
     }
 
     const changeDeleteModal = () => {
@@ -218,37 +225,54 @@ class ScheduleDetail extends Component {
                   </CValidFeedback>
                 </CInputGroup>
               </CFormGroup>
-              <CFormGroup className={this.state.passwordChecked && "was-validated"}>
-                <CInputGroup className="mb-4">
-                  <CInputGroupPrepend>
-                    <CInputGroupText>
-                      From
-                    </CInputGroupText>
-                  </CInputGroupPrepend>
-                  <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.putdata.started_at} onChange={changePutStartedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} required />
-                  <CInvalidFeedback className="help-block">
-                    Neccessary
-                  </CInvalidFeedback>
-                  <CValidFeedback className="help-block">
-                    OK
-                  </CValidFeedback>
-                </CInputGroup>
-              </CFormGroup>
-              <CFormGroup className={this.state.passwordChecked && "was-validated"}>
-                <CInputGroup className="mb-4">
-                  <CInputGroupPrepend>
-                    <CInputGroupText>
-                      To
-                    </CInputGroupText>
-                  </CInputGroupPrepend>
-                  <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.putdata.ended_at} onChange={changePutEndedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} required />
-                  <CInvalidFeedback className="help-block">
-                    Neccessary
-                  </CInvalidFeedback>
-                  <CValidFeedback className="help-block">
-                    OK
-                  </CValidFeedback>
-                </CInputGroup>
+              <CFormGroup row className="my-0">
+                <CCol xs="8">
+                  <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+                    <CInputGroup className="mb-4">
+                      <CInputGroupPrepend>
+                        <CInputGroupText>
+                          From
+                        </CInputGroupText>
+                      </CInputGroupPrepend>
+                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.putdata.started_at} onChange={changePutStartedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} disabled={this.state.putdata.allday} required />
+                      <CInvalidFeedback className="help-block">
+                        Neccessary
+                      </CInvalidFeedback>
+                      <CValidFeedback className="help-block">
+                        OK
+                      </CValidFeedback>
+                    </CInputGroup>
+                  </CFormGroup>
+                  <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+                    <CInputGroup className="mb-4">
+                      <CInputGroupPrepend>
+                        <CInputGroupText>
+                          To
+                        </CInputGroupText>
+                      </CInputGroupPrepend>
+                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.putdata.ended_at} onChange={changePutEndedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} disabled={this.state.putdata.allday} required />
+                      <CInvalidFeedback className="help-block">
+                        Neccessary
+                      </CInvalidFeedback>
+                      <CValidFeedback className="help-block">
+                        OK
+                      </CValidFeedback>
+                    </CInputGroup>
+                  </CFormGroup>
+                </CCol>
+                <CCol xs="4">
+                  <CInputGroup className="mb-4">
+                    <CLabel htmlFor="allday">All-Day　</CLabel>
+                    <CSwitch
+                      className="mr-1"
+                      color="info"
+                      labelOn={'\u2713'} //check mark
+                      labelOff={'\u2715'} //cross mark
+                      checked={this.state.putdata.allday}
+                      onChange={changePutAllday}
+                    />
+                  </CInputGroup>
+                </CCol>
               </CFormGroup>
               <CFormGroup className={this.state.passwordChecked && "was-validated"}>
                 <CInputGroup className="mb-4">
