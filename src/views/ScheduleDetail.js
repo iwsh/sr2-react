@@ -130,14 +130,10 @@ class ScheduleDetail extends Component {
 
     const changeEditModal = () => {
       this.setState({
-        putdata: {date: this.props.item.date, title: this.props.item.title, started_at: this.props.item.started_at, ended_at: this.props.item.ended_at, detail: this.props.item.detail},
+        putdata: {date: this.props.item.date, title: this.props.item.title, started_at: this.props.item.started_at, ended_at: this.props.item.ended_at, allday: this.props.item.allday, detail: this.props.item.detail},
         editModal: !this.state.editModal,
         error: ''
       })
-    }
-
-    const changePutAllday = () => {
-      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, allday: !this.state.putdata.allday, detail: this.state.putdata.detail}});
     }
 
     const changePutDate = (e) => {
@@ -154,6 +150,10 @@ class ScheduleDetail extends Component {
 
     const changePutEndedAt = (e) => {
       this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: e.target.value, allday: this.state.putdata.allday, detail: this.state.putdata.detail}});
+    }
+
+    const changePutAllday = () => {
+      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, allday: !this.state.putdata.allday, detail: this.state.putdata.detail}});
     }
 
     const changePutDetail = (e) => {

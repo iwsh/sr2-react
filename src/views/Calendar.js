@@ -23,11 +23,13 @@ import {
   CInputGroupPrepend,
   CInputGroupText,
   CInvalidFeedback,
+  CLabel,
   CModal,
   CModalBody,
   CModalFooter,
   CModalHeader,
   CModalTitle,
+  CSwitch,
   CRow,
   CValidFeedback
 } from '@coreui/react'
@@ -49,7 +51,7 @@ class Calendar extends Component {
       posterror: '',
       loading: true,
       addModal: false,
-      postdata: {date: '', title: '', started_at: '', ended_at: '', detail: ''},
+      postdata: {date: '', title: '', started_at: '', ended_at: '', allday: false, detail: ''},
     };
   }
 
@@ -120,23 +122,27 @@ class Calendar extends Component {
   }
 
   changePostDate(e) {
-    this.setState({postdata: {date: e.target.value, title: this.state.postdata.title, started_at: this.state.postdata.started_at, ended_at: this.state.postdata.ended_at, detail: this.state.postdata.detail}});
+    this.setState({postdata: {date: e.target.value, title: this.state.postdata.title, started_at: this.state.postdata.started_at, ended_at: this.state.postdata.ended_at, allday: this.state.postdata.allday, detail: this.state.postdata.detail}});
   }
 
   changePostTitle(e) {
-    this.setState({postdata: {date: this.state.postdata.date, title: e.target.value, started_at: this.state.postdata.started_at, ended_at: this.state.postdata.ended_at, detail: this.state.postdata.detail}});
+    this.setState({postdata: {date: this.state.postdata.date, title: e.target.value, started_at: this.state.postdata.started_at, ended_at: this.state.postdata.ended_at, allday: this.state.postdata.allday, detail: this.state.postdata.detail}});
   }
 
   changePostStartedAt(e) {
-    this.setState({postdata: {date: this.state.postdata.date, title: this.state.postdata.title, started_at: e.target.value, ended_at: this.state.postdata.ended_at, detail: this.state.postdata.detail}});
+    this.setState({postdata: {date: this.state.postdata.date, title: this.state.postdata.title, started_at: e.target.value, ended_at: this.state.postdata.ended_at, allday: this.state.postdata.allday, detail: this.state.postdata.detail}});
   }
 
   changePostEndedAt(e) {
-    this.setState({postdata: {date: this.state.postdata.date, title: this.state.postdata.title, started_at: this.state.postdata.started_at, ended_at: e.target.value, detail: this.state.postdata.detail}});
+    this.setState({postdata: {date: this.state.postdata.date, title: this.state.postdata.title, started_at: this.state.postdata.started_at, ended_at: e.target.value, allday: this.state.postdata.allday, detail: this.state.postdata.detail}});
+  }
+
+  changePostAllday = () => {
+    this.setState({postdata: {date: this.state.postdata.date, title: this.state.postdata.title, started_at: this.state.postdata.started_at, ended_at: this.state.postdata.ended_at, allday: !this.state.postdata.allday, detail: this.state.postdata.detail}});
   }
 
   changePostDetail(e) {
-    this.setState({postdata: {date: this.state.postdata.date, title: this.state.postdata.title, started_at: this.state.postdata.started_at, ended_at: this.state.postdata.ended_at, detail: e.target.value}});
+    this.setState({postdata: {date: this.state.postdata.date, title: this.state.postdata.title, started_at: this.state.postdata.started_at, ended_at: this.state.postdata.ended_at, allday: this.state.postdata.allday, detail: e.target.value}});
   }
 
   render() {
@@ -200,13 +206,13 @@ class Calendar extends Component {
     const changeAddModal = () => {
       if (this.state.addModal) {
         this.setState({
-          postdata: {date: '', title: '', started_at: '', ended_at: '', detail: ''},
+          postdata: {date: '', title: '', started_at: '', ended_at: '', allday: false, detail: ''},
           addModal: !this.state.addModal,
           posterror: ''
         })
       } else {
         this.setState({
-          postdata: {date: this.state.date.getFullYear()+'-'+('0'+(this.state.date.getMonth() + 1)).slice(-2)+'-'+('0'+this.state.date.getDate()).slice(-2), title: '', started_at: '', ended_at: '', detail: ''},
+          postdata: {date: this.state.date.getFullYear()+'-'+('0'+(this.state.date.getMonth() + 1)).slice(-2)+'-'+('0'+this.state.date.getDate()).slice(-2), title: '', started_at: '', ended_at: '', allday: false, detail: ''},
           addModal: !this.state.addModal,
           posterror: ''
         })
@@ -391,37 +397,54 @@ class Calendar extends Component {
                   </CValidFeedback>
                 </CInputGroup>
               </CFormGroup>
-              <CFormGroup className={this.state.passwordChecked && "was-validated"}>
-                <CInputGroup className="mb-4">
-                  <CInputGroupPrepend>
-                    <CInputGroupText>
-                      From
-                    </CInputGroupText>
-                  </CInputGroupPrepend>
-                  <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.postdata.started_at} onChange={this.changePostStartedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} required />
-                  <CInvalidFeedback className="help-block">
-                    Neccessary
-                  </CInvalidFeedback>
-                  <CValidFeedback className="help-block">
-                    OK
-                  </CValidFeedback>
-                </CInputGroup>
-              </CFormGroup>
-              <CFormGroup className={this.state.passwordChecked && "was-validated"}>
-                <CInputGroup className="mb-4">
-                  <CInputGroupPrepend>
-                    <CInputGroupText>
-                      To
-                    </CInputGroupText>
-                  </CInputGroupPrepend>
-                  <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.postdata.ended_at} onChange={this.changePostEndedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} required />
-                  <CInvalidFeedback className="help-block">
-                    Neccessary
-                  </CInvalidFeedback>
-                  <CValidFeedback className="help-block">
-                    OK
-                  </CValidFeedback>
-                </CInputGroup>
+              <CFormGroup row className="my-0">
+                <CCol xs="8">
+                  <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+                    <CInputGroup className="mb-4">
+                      <CInputGroupPrepend>
+                        <CInputGroupText>
+                          From
+                        </CInputGroupText>
+                      </CInputGroupPrepend>
+                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.postdata.started_at} onChange={this.changePostStartedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} disabled={this.state.postdata.allday} required />
+                      <CInvalidFeedback className="help-block">
+                        Neccessary
+                      </CInvalidFeedback>
+                      <CValidFeedback className="help-block">
+                        OK
+                      </CValidFeedback>
+                    </CInputGroup>
+                  </CFormGroup>
+                  <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+                    <CInputGroup className="mb-4">
+                      <CInputGroupPrepend>
+                        <CInputGroupText>
+                          To
+                        </CInputGroupText>
+                      </CInputGroupPrepend>
+                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.postdata.ended_at} onChange={this.changePostEndedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} disabled={this.state.postdata.allday} required />
+                      <CInvalidFeedback className="help-block">
+                        Neccessary
+                      </CInvalidFeedback>
+                      <CValidFeedback className="help-block">
+                        OK
+                      </CValidFeedback>
+                    </CInputGroup>
+                  </CFormGroup>
+                </CCol>
+                <CCol xs="4">
+                  <CInputGroup className="mb-4">
+                    <CLabel htmlFor="allday">All-Day　</CLabel>
+                    <CSwitch
+                      className="mr-1"
+                      color="success"
+                      labelOn={'\u2713'} //check mark
+                      labelOff={'\u2715'} //cross mark
+                      checked={this.state.postdata.allday}
+                      onChange={this.changePostAllday}
+                    />
+                  </CInputGroup>
+                </CCol>
               </CFormGroup>
               <CFormGroup className={this.state.passwordChecked && "was-validated"}>
                 <CInputGroup className="mb-4">
