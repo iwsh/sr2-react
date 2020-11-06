@@ -221,44 +221,90 @@ class Calendar extends Component {
     // ===ココマデ===
 
     const postSchedules = () => {
-      axios
-        .post(this.state.url_schedules, this.state.postdata, {
-          headers: { "AuthHeader": window.btoa(this.state.email + ":" + this.state.password) }
-        })
-        .then((results) => {
-          console.log(results.data);
-          this.setState(
-            {posterror: '' },
-            () => this.getSchedules(),
-            setDailySchedules(this.state.date),
-            console.log(this.state.dailyData),
-            changeAddModal()
-          )
-        },)
-        .catch((error) => {
-          if (error.response) {
-            // このリクエストはステータスコードとともに作成されます
-            // 2xx系以外の時にエラーが発生します
-            console.log(error.response.data);
-            console.log(error.response.status);
-            console.log(error.response.headers);
-            if (error.response.status == '400') {
-              this.setState({ posterror: '入力エラー：入力内容を確認してください。' })
+      const validation_error = validationCheck(this.state.postdata.date, this.state.postdata.title, this.state.postdata.started_at, this.state.postdata.ended_at, this.state.postdata.allday)
+      if (validation_error.length == 0) {
+        axios
+          .post(this.state.url_schedules, this.state.postdata, {
+            headers: { "AuthHeader": window.btoa(this.state.email + ":" + this.state.password) }
+          })
+          .then((results) => {
+            console.log(results.data);
+            this.setState(
+              {posterror: '' },
+              () => this.getSchedules(),
+              setDailySchedules(this.state.date),
+              console.log(this.state.dailyData),
+              changeAddModal()
+            )
+          },)
+          .catch((error) => {
+            if (error.response) {
+              // このリクエストはステータスコードとともに作成されます
+              // 2xx系以外の時にエラーが発生します
+              console.log(error.response.data);
+              console.log(error.response.status);
+              console.log(error.response.headers);
+              if (error.response.status == '400') {
+                this.setState({ posterror: '入力エラー：入力内容を確認してください。' })
+              } else {
+                this.setState({ posterror: '不明なエラーです。管理者に問い合わせてください。' })
+              }
+            } else if (error.request) {
+              // このリクエストはレスポンスが返ってこない時に作成されます。
+              // `error.request`はXMLHttpRequestのインスタンスです。
+              console.log(error.request);
+              this.setState({ posterror: '不明なエラーです。管理者に問い合わせてください。' })
             } else {
+              //それ以外で何か以上が起こった時
+              console.log('Error', error.message);
               this.setState({ posterror: '不明なエラーです。管理者に問い合わせてください。' })
             }
-          } else if (error.request) {
-            // このリクエストはレスポンスが返ってこない時に作成されます。
-            // `error.request`はXMLHttpRequestのインスタンスです。
-            console.log(error.request);
-            this.setState({ posterror: '不明なエラーです。管理者に問い合わせてください。' })
+            console.log(error.config);
+          })
+      } else {
+        let posterror = ''
+        validation_error.map((content,index) =>
+          posterror = posterror + content
+        )
+        this.setState({ posterror }); // validation NGのときのエラーメッセージ
+      }
+    }
+
+    const validationCheck = (date, title, started_at, ended_at, allday) => {
+      let error = []
+      let list = []
+      if ( date == '' ) {
+        list.push('Date')
+      }
+      if ( title == '' ) {
+        list.push('Title')
+      }
+      if ( allday == false ) {
+        let flg = 0
+        if ( started_at == '' ) {
+          list.push('From')
+          flg = 1
+        }
+        if ( ended_at == '' ) {
+          list.push('To')
+          flg = 1
+        }
+        if ( flg == 0 && started_at >= ended_at ) {
+          error.push('To は From より後の時刻を設定する必要があります。')
+        }
+      }
+      if ( list.length > 0 ) {
+        let required_message = ''
+        list.map((content,index) =>
+          { if (index + 1 < list.length) {
+            required_message = required_message + content + ' と '
           } else {
-            //それ以外で何か以上が起こった時
-            console.log('Error', error.message);
-            this.setState({ posterror: '不明なエラーです。管理者に問い合わせてください。' })
-          }
-          console.log(error.config);
-        })
+            required_message = required_message + content + ' は入力必須です。'
+            error.unshift(required_message)
+          } }
+        )
+      }
+      return error
     }
 
     return (
@@ -342,7 +388,7 @@ class Calendar extends Component {
                       (item, index)=>{
                         return (
                           <CCollapse show={this.state.details.includes(index)}>
-                            <ScheduleDetail item={item} url_schedules={this.state.url_schedules} getSchedules={this.getSchedules.bind(this)} setDailySchedules={setDailySchedules.bind(this)} date={this.state.date} email={this.state.email} password={this.state.password} />
+                            <ScheduleDetail item={item} url_schedules={this.state.url_schedules} getSchedules={this.getSchedules.bind(this)} setDailySchedules={setDailySchedules.bind(this)} validationCheck={validationCheck.bind(this)} date={this.state.date} email={this.state.email} password={this.state.password} />
                           </CCollapse>
                         )
                       }
@@ -453,7 +499,7 @@ class Calendar extends Component {
                       Detail
                     </CInputGroupText>
                   </CInputGroupPrepend>
-                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="detail" value={this.state.postdata.detail} onChange={this.changePostDetail.bind(this)} onBlur={() => this.setState({passwordChecked: true})} required />
+                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="detail" value={this.state.postdata.detail} onChange={this.changePostDetail.bind(this)} onBlur={() => this.setState({passwordChecked: true})} />
                   <CInvalidFeedback className="help-block">
                     Neccessary
                   </CInvalidFeedback>

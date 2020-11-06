@@ -85,47 +85,56 @@ class ScheduleDetail extends Component {
     }
 
     const putSchedules = () => {
-      axios
-      .put(this.props.url_schedules + '/' + this.props.item.id, this.state.putdata, {
-        headers: { "AuthHeader": window.btoa(this.props.email + ":" + this.props.password) }
-      })
-      .then((results) => {
-        console.log(results.data);
-        this.setState(
-          {error: '' },
-          () => this.props.getSchedules(),
-          this.props.setDailySchedules(this.props.date),
-          changeEditModal()
-        )
-      },)
-      .catch((error) => {
-        if (error.response) {
-          // このリクエストはステータスコードとともに作成されます
-          // 2xx系以外の時にエラーが発生します
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-          if (error.response.status == '400') {
-            this.setState({ error: '入力エラー：入力内容を確認してください。' })
-          } else if (error.response.status == '403') {
-            this.setState({ error: '更新できるのは自身のスケジュールのみです。' })
-          } else if (error.response.status == '404') {
-            this.setState({ error: 'そのスケジュールはすでに削除されています。' })
+      const validation_error = this.props.validationCheck(this.state.putdata.date, this.state.putdata.title, this.state.putdata.started_at, this.state.putdata.ended_at, this.state.putdata.allday)
+      if (validation_error.length == 0) {
+        axios
+        .put(this.props.url_schedules + '/' + this.props.item.id, this.state.putdata, {
+          headers: { "AuthHeader": window.btoa(this.props.email + ":" + this.props.password) }
+        })
+        .then((results) => {
+          console.log(results.data);
+          this.setState(
+            {error: '' },
+            () => this.props.getSchedules(),
+            this.props.setDailySchedules(this.props.date),
+            changeEditModal()
+          )
+        },)
+        .catch((error) => {
+          if (error.response) {
+            // このリクエストはステータスコードとともに作成されます
+            // 2xx系以外の時にエラーが発生します
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            if (error.response.status == '400') {
+              this.setState({ error: '入力エラー：入力内容を確認してください。' })
+            } else if (error.response.status == '403') {
+              this.setState({ error: '更新できるのは自身のスケジュールのみです。' })
+            } else if (error.response.status == '404') {
+              this.setState({ error: 'そのスケジュールはすでに削除されています。' })
+            } else {
+              this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
+            }
+          } else if (error.request) {
+            // このリクエストはレスポンスが返ってこない時に作成されます。
+            // `error.request`はXMLHttpRequestのインスタンスです。
+            console.log(error.request);
+            this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
           } else {
+            //それ以外で何か以上が起こった時
+            console.log('Error', error.message);
             this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
           }
-        } else if (error.request) {
-          // このリクエストはレスポンスが返ってこない時に作成されます。
-          // `error.request`はXMLHttpRequestのインスタンスです。
-          console.log(error.request);
-          this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
-        } else {
-          //それ以外で何か以上が起こった時
-          console.log('Error', error.message);
-          this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
-        }
-        console.log(error.config);
-      })
+          console.log(error.config);
+        })
+      } else {
+        let error = ''
+        validation_error.map((content,index) =>
+          error = error + content
+        )
+        this.setState({ error }); // validation NGのときのエラーメッセージ
+      }
     }
 
     const changeEditModal = () => {
@@ -281,7 +290,7 @@ class ScheduleDetail extends Component {
                       Detail
                     </CInputGroupText>
                   </CInputGroupPrepend>
-                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="detail" value={this.state.putdata.detail} onChange={changePutDetail.bind(this)} onBlur={() => this.setState({passwordChecked: true})} required />
+                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="detail" value={this.state.putdata.detail} onChange={changePutDetail.bind(this)} onBlur={() => this.setState({passwordChecked: true})} />
                   <CInvalidFeedback className="help-block">
                     Neccessary
                   </CInvalidFeedback>
