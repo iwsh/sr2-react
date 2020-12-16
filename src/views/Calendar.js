@@ -66,7 +66,7 @@ class Calendar extends Component {
       if (year !== '' && month !== '') {
         axios
           .get(this.state.url_schedules + '/' + year + '/' + month, {
-            headers: { "AuthHeader": window.btoa(this.state.email + ":" + this.state.password) },
+            headers: { "Authorization": `Basic ${window.btoa(this.state.email + ":" + this.state.password)}` },
             data: {}
           })
           .then((results) => {
@@ -217,7 +217,7 @@ class Calendar extends Component {
     const postSchedules = () => {
       axios
         .post(this.state.url_schedules, this.state.postdata, {
-          headers: { "AuthHeader": window.btoa(this.state.email + ":" + this.state.password) }
+          headers: { "Authorization": `Basic ${window.btoa(this.state.email + ":" + this.state.password)}` }
         })
         .then((results) => {
           console.log(results.data);
@@ -430,7 +430,7 @@ class Calendar extends Component {
                       Detail
                     </CInputGroupText>
                   </CInputGroupPrepend>
-                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="detail" value={this.state.postdata.detail} onChange={this.changePostDetail.bind(this)} onBlur={() => this.setState({passwordChecked: true})} required />
+                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="detail" value={this.state.postdata.detail} onChange={this.changePostDetail.bind(this)} onBlur={() => this.setState({passwordChecked: true})} />
                   <CInvalidFeedback className="help-block">
                     Neccessary
                   </CInvalidFeedback>
