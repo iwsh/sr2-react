@@ -368,6 +368,30 @@ class Calendar extends Component {
                   sorter
                   pagination
                   scopedSlots = {{
+                    'started_at':
+                      (item)=>(
+                        (item.started_at === "")? (
+                          <td align="right">
+                            <span style={{color:'#321fdb', fontWeight:'bold'}}>ALL</span>
+                          </td>
+                        ) : (
+                          <td>
+                            {item.started_at}
+                          </td>
+                        )
+                      ),
+                    'ended_at':
+                      (item)=>(
+                        (item.ended_at === "")? (
+                          <td align="left">
+                          <span style={{color:'#321fdb', fontWeight:'bold'}}>DAY</span>
+                          </td>
+                        ) : (
+                          <td>
+                            {item.ended_at}
+                          </td>
+                        )
+                      ),
                     'show_details':
                       (item, index)=>{
                         return (
