@@ -49,7 +49,7 @@ class Login extends Component {
     if (error == '') {
       axios
         .get(this.state.url_login, {
-          headers: { "AuthHeader": window.btoa(email + ":" + password) },
+          headers: { "Authorization": `Basic ${window.btoa(email + ":" + password)}` },
           data: {}
         })
         .then((results) => {
