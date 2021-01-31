@@ -4,6 +4,7 @@ import axios from 'axios'
 import {
   CButton,
   CCardBody,
+  CCol,
   CForm,
   CFormGroup,
   CInput,
@@ -11,11 +12,13 @@ import {
   CInputGroupPrepend,
   CInputGroupText,
   CInvalidFeedback,
+  CLabel,
   CModal,
   CModalBody,
   CModalFooter,
   CModalHeader,
   CModalTitle,
+  CSwitch,
   CValidFeedback
 } from '@coreui/react'
 
@@ -27,7 +30,7 @@ class ScheduleDetail extends Component {
       date: new Date(),
       dailyData: [],
       error: '',
-      putdata: {date: this.props.item.date, title: this.props.item.title, started_at: this.props.item.started_at, ended_at: this.props.item.ended_at, detail: this.props.item.detail},
+      putdata: {date: this.props.item.date, title: this.props.item.title, started_at: this.props.item.started_at, ended_at: this.props.item.ended_at, allday: this.props.item.allday, detail: this.props.item.detail},
       editModal: false,
       deleteModal: false,
     };
@@ -82,75 +85,88 @@ class ScheduleDetail extends Component {
     }
 
     const putSchedules = () => {
-      axios
-      .put(this.props.url_schedules + '/' + this.props.item.id, this.state.putdata, {
-        headers: { "Authorization": `Basic ${window.btoa(this.props.email + ":" + this.props.password)}` }
-      })
-      .then((results) => {
-        console.log(results.data);
-        this.setState(
-          {error: '' },
-          () => this.props.getSchedules(),
-          this.props.setDailySchedules(this.props.date),
-          changeEditModal()
+      const validation_error = this.props.validationCheck(this.state.putdata.date, this.state.putdata.title, this.state.putdata.started_at, this.state.putdata.ended_at, this.state.putdata.allday)
+      if (validation_error.length == 0) {
+        axios
+          .put(this.props.url_schedules + '/' + this.props.item.id, this.state.putdata, {
+            headers: { "Authorization": `Basic ${window.btoa(this.props.email + ":" + this.props.password)}` }
+          })
+          .then((results) => {
+            console.log(results.data);
+            this.setState(
+              {error: '' },
+              () => this.props.getSchedules(),
+              this.props.setDailySchedules(this.props.date),
+              changeEditModal()
+            )
+          },)
+          .catch((error) => {
+            if (error.response) {
+              // このリクエストはステータスコードとともに作成されます
+              // 2xx系以外の時にエラーが発生します
+              console.log(error.response.data);
+              console.log(error.response.status);
+              console.log(error.response.headers);
+              if (error.response.status == '400') {
+                this.setState({ error: '入力エラー：入力内容を確認してください。' })
+              } else if (error.response.status == '403') {
+                this.setState({ error: '更新できるのは自身のスケジュールのみです。' })
+              } else if (error.response.status == '404') {
+                this.setState({ error: 'そのスケジュールはすでに削除されています。' })
+              } else {
+                this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
+              }
+            } else if (error.request) {
+              // このリクエストはレスポンスが返ってこない時に作成されます。
+              // `error.request`はXMLHttpRequestのインスタンスです。
+              console.log(error.request);
+              this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
+            } else {
+              //それ以外で何か以上が起こった時
+              console.log('Error', error.message);
+              this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
+            }
+            console.log(error.config);
+          })
+      } else {
+        let error = ''
+        validation_error.map((content,index) =>
+          error = error + content
         )
-      },)
-      .catch((error) => {
-        if (error.response) {
-          // このリクエストはステータスコードとともに作成されます
-          // 2xx系以外の時にエラーが発生します
-          console.log(error.response.data);
-          console.log(error.response.status);
-          console.log(error.response.headers);
-          if (error.response.status == '400') {
-            this.setState({ error: '入力エラー：入力内容を確認してください。' })
-          } else if (error.response.status == '403') {
-            this.setState({ error: '更新できるのは自身のスケジュールのみです。' })
-          } else if (error.response.status == '404') {
-            this.setState({ error: 'そのスケジュールはすでに削除されています。' })
-          } else {
-            this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
-          }
-        } else if (error.request) {
-          // このリクエストはレスポンスが返ってこない時に作成されます。
-          // `error.request`はXMLHttpRequestのインスタンスです。
-          console.log(error.request);
-          this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
-        } else {
-          //それ以外で何か以上が起こった時
-          console.log('Error', error.message);
-          this.setState({ error: '不明なエラーです。管理者に問い合わせてください。' })
-        }
-        console.log(error.config);
-      })
+        this.setState({ error }); // validation NGのときのエラーメッセージ
+      }
     }
 
     const changeEditModal = () => {
       this.setState({
-        putdata: {date: this.props.item.date, title: this.props.item.title, started_at: this.props.item.started_at, ended_at: this.props.item.ended_at, detail: this.props.item.detail},
+        putdata: {date: this.props.item.date, title: this.props.item.title, started_at: this.props.item.started_at, ended_at: this.props.item.ended_at, allday: this.props.item.allday, detail: this.props.item.detail},
         editModal: !this.state.editModal,
         error: ''
       })
     }
 
     const changePutDate = (e) => {
-      this.setState({putdata: {date: e.target.value, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, detail: this.state.putdata.detail}});
+      this.setState({putdata: {date: e.target.value, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, allday: this.state.putdata.allday, detail: this.state.putdata.detail}});
     }
 
     const changePutTitle = (e) => {
-      this.setState({putdata: {date: this.state.putdata.date, title: e.target.value, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, detail: this.state.putdata.detail}});
+      this.setState({putdata: {date: this.state.putdata.date, title: e.target.value, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, allday: this.state.putdata.allday, detail: this.state.putdata.detail}});
     }
 
     const changePutStartedAt = (e) => {
-      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: e.target.value, ended_at: this.state.putdata.ended_at, detail: this.state.putdata.detail}});
+      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: e.target.value, ended_at: this.state.putdata.ended_at, allday: this.state.putdata.allday, detail: this.state.putdata.detail}});
     }
 
     const changePutEndedAt = (e) => {
-      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: e.target.value, detail: this.state.putdata.detail}});
+      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: e.target.value, allday: this.state.putdata.allday, detail: this.state.putdata.detail}});
+    }
+
+    const changePutAllday = () => {
+      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, allday: !this.state.putdata.allday, detail: this.state.putdata.detail}});
     }
 
     const changePutDetail = (e) => {
-      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, detail: e.target.value}});
+      this.setState({putdata: {date: this.state.putdata.date, title: this.state.putdata.title, started_at: this.state.putdata.started_at, ended_at: this.state.putdata.ended_at, allday: this.state.putdata.allday, detail: e.target.value}});
     }
 
     const changeDeleteModal = () => {
@@ -218,37 +234,54 @@ class ScheduleDetail extends Component {
                   </CValidFeedback>
                 </CInputGroup>
               </CFormGroup>
-              <CFormGroup className={this.state.passwordChecked && "was-validated"}>
-                <CInputGroup className="mb-4">
-                  <CInputGroupPrepend>
-                    <CInputGroupText>
-                      From
-                    </CInputGroupText>
-                  </CInputGroupPrepend>
-                  <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.putdata.started_at} onChange={changePutStartedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} required />
-                  <CInvalidFeedback className="help-block">
-                    Neccessary
-                  </CInvalidFeedback>
-                  <CValidFeedback className="help-block">
-                    OK
-                  </CValidFeedback>
-                </CInputGroup>
-              </CFormGroup>
-              <CFormGroup className={this.state.passwordChecked && "was-validated"}>
-                <CInputGroup className="mb-4">
-                  <CInputGroupPrepend>
-                    <CInputGroupText>
-                      To
-                    </CInputGroupText>
-                  </CInputGroupPrepend>
-                  <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.putdata.ended_at} onChange={changePutEndedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} required />
-                  <CInvalidFeedback className="help-block">
-                    Neccessary
-                  </CInvalidFeedback>
-                  <CValidFeedback className="help-block">
-                    OK
-                  </CValidFeedback>
-                </CInputGroup>
+              <CFormGroup row className="my-0">
+                <CCol xs="8">
+                  <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+                    <CInputGroup className="mb-4">
+                      <CInputGroupPrepend>
+                        <CInputGroupText>
+                          From
+                        </CInputGroupText>
+                      </CInputGroupPrepend>
+                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.putdata.started_at} onChange={changePutStartedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} disabled={this.state.putdata.allday} required />
+                      <CInvalidFeedback className="help-block">
+                        Neccessary
+                      </CInvalidFeedback>
+                      <CValidFeedback className="help-block">
+                        OK
+                      </CValidFeedback>
+                    </CInputGroup>
+                  </CFormGroup>
+                  <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+                    <CInputGroup className="mb-4">
+                      <CInputGroupPrepend>
+                        <CInputGroupText>
+                          To
+                        </CInputGroupText>
+                      </CInputGroupPrepend>
+                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.putdata.ended_at} onChange={changePutEndedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} disabled={this.state.putdata.allday} required />
+                      <CInvalidFeedback className="help-block">
+                        Neccessary
+                      </CInvalidFeedback>
+                      <CValidFeedback className="help-block">
+                        OK
+                      </CValidFeedback>
+                    </CInputGroup>
+                  </CFormGroup>
+                </CCol>
+                <CCol xs="4">
+                  <CInputGroup className="mb-4">
+                    <CLabel htmlFor="allday">All-Day　</CLabel>
+                    <CSwitch
+                      className="mr-1"
+                      color="info"
+                      labelOn={'\u2713'} //check mark
+                      labelOff={'\u2715'} //cross mark
+                      checked={this.state.putdata.allday}
+                      onChange={changePutAllday}
+                    />
+                  </CInputGroup>
+                </CCol>
               </CFormGroup>
               <CFormGroup className={this.state.passwordChecked && "was-validated"}>
                 <CInputGroup className="mb-4">
@@ -284,6 +317,7 @@ class ScheduleDetail extends Component {
             <CModalTitle>スケジュール　削除</CModalTitle>
           </CModalHeader>
           <CModalBody>
+            {this.state.error != '' && <p style={{color:'#ff0000'}}>{this.state.error}</p>}
             <p>本当にこの予定を削除してもよろしいですか？</p>
             <p>Date: {this.props.item.date}</p>
             <p>Title: {this.props.item.title}</p>
