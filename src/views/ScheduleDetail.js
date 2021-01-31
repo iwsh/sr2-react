@@ -39,7 +39,7 @@ class ScheduleDetail extends Component {
     const deleteSchedules = () => {
       axios
         .delete(this.props.url_schedules + '/' + this.props.item.id, {
-          headers: { "email": window.btoa(this.props.email), "password": window.btoa(this.props.password) },
+          headers: { "Authorization": `Basic ${window.btoa(this.props.email + ":" + this.props.password)}` },
           data: {}
         })
         .then((results) => {
@@ -84,7 +84,7 @@ class ScheduleDetail extends Component {
     const putSchedules = () => {
       axios
       .put(this.props.url_schedules + '/' + this.props.item.id, this.state.putdata, {
-        headers: { "email": window.btoa(this.props.email), "password": window.btoa(this.props.password) }
+        headers: { "Authorization": `Basic ${window.btoa(this.props.email + ":" + this.props.password)}` }
       })
       .then((results) => {
         console.log(results.data);
@@ -257,7 +257,7 @@ class ScheduleDetail extends Component {
                       Detail
                     </CInputGroupText>
                   </CInputGroupPrepend>
-                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="detail" value={this.state.putdata.detail} onChange={changePutDetail.bind(this)} onBlur={() => this.setState({passwordChecked: true})} required />
+                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="detail" value={this.state.putdata.detail} onChange={changePutDetail.bind(this)} onBlur={() => this.setState({passwordChecked: true})} />
                   <CInvalidFeedback className="help-block">
                     Neccessary
                   </CInvalidFeedback>
