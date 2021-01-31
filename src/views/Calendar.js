@@ -52,73 +52,94 @@ class Calendar extends Component {
       loading: true,
       addModal: false,
       postdata: {date: '', title: '', started_at: '', ended_at: '', allday: false, detail: ''},
+      dateChecked: false,
+      titleChecked: false,
+      fromChecked: false,
+      toChecked: false,
+      detailChecked: false,
     };
   }
 
   componentDidMount() {
-    this.getSchedules()
+    this.getSchedules().then((next) => {
+      this.setDailySchedules(this.state.date)
+    })
   }
 
   getSchedules = () => {
-    this.setState({
-      loading: true,
-    }, () => {
-      let year = this.state.selectedYM[0]
-      let month = this.state.selectedYM[1]
-      if (year !== '' && month !== '') {
-        axios
-          .get(this.state.url_schedules + '/' + year + '/' + month, {
-            headers: { "Authorization": `Basic ${window.btoa(this.state.email + ":" + this.state.password)}` },
-            data: {}
-          })
-          .then((results) => {
-            console.log(results.data);
-            // オブジェクトが空かどうか判定
-            if (!Object.keys(results.data).length === false) {
-              this.setState({
-                monthlyData: results.data,
-                loading: false,
-              });
-            } else {
-              this.setState({
-                monthlyData: [],
-                loading: false,
-              });
-            }
-          },)
-          .catch((error) => {
-            if (error.response) {
-              // このリクエストはステータスコードとともに作成されます
-              // 2xx系以外の時にエラーが発生します
-              console.log(error.response.data);
-              console.log(error.response.status);
-              console.log(error.response.headers);
-              if (error.response.status == '400') {
-                this.setState({ geterror: '年 および 月は入力必須です。', loading: false })
-              } else if (error.response.status == '401') {
-                this.setState({ geterror: 'Email または Password が違います。', loading: false })
-              } else if (error.response.status == '423') {
-                this.setState({ geterror: 'アカウントロックされています。解除するためには、管理者に問い合わせてください。', loading: false })
+    return new Promise((resolve, reject) => {
+      this.setState({
+        loading: true,
+      }, () => {
+        let year = this.state.selectedYM[0]
+        let month = this.state.selectedYM[1]
+        if (year !== '' && month !== '') {
+          axios
+            .get(this.state.url_schedules + '/' + year + '/' + month, {
+              headers: { "Authorization": `Basic ${window.btoa(this.state.email + ":" + this.state.password)}` },
+              data: {}
+            })
+            .then((results) => {
+              console.log(results.data);
+              // オブジェクトが空かどうか判定
+              if (!Object.keys(results.data).length === false) {
+                this.setState({
+                  monthlyData: results.data,
+                  loading: false,
+                });
               } else {
+                this.setState({
+                  monthlyData: [],
+                  loading: false,
+                });
+              }
+              resolve()
+            },)
+            .catch((error) => {
+              if (error.response) {
+                // このリクエストはステータスコードとともに作成されます
+                // 2xx系以外の時にエラーが発生します
+                console.log(error.response.data);
+                console.log(error.response.status);
+                console.log(error.response.headers);
+                if (error.response.status == '400') {
+                  this.setState({ geterror: '年 および 月は入力必須です。', loading: false })
+                } else if (error.response.status == '401') {
+                  this.setState({ geterror: 'Email または Password が違います。', loading: false })
+                } else if (error.response.status == '423') {
+                  this.setState({ geterror: 'アカウントロックされています。解除するためには、管理者に問い合わせてください。', loading: false })
+                } else {
+                  this.setState({ geterror: '不明なエラーです。管理者に問い合わせてください。', loading: false })
+                }
+              } else if (error.request) {
+                // このリクエストはレスポンスが返ってこない時に作成されます。
+                // `error.request`はXMLHttpRequestのインスタンスです。
+                console.log(error.request);
+                this.setState({ geterror: '不明なエラーです。管理者に問い合わせてください。', loading: false })
+              } else {
+                //それ以外で何か以上が起こった時
+                console.log('Error', error.message);
                 this.setState({ geterror: '不明なエラーです。管理者に問い合わせてください。', loading: false })
               }
-            } else if (error.request) {
-              // このリクエストはレスポンスが返ってこない時に作成されます。
-              // `error.request`はXMLHttpRequestのインスタンスです。
-              console.log(error.request);
-              this.setState({ geterror: '不明なエラーです。管理者に問い合わせてください。', loading: false })
-            } else {
-              //それ以外で何か以上が起こった時
-              console.log('Error', error.message);
-              this.setState({ geterror: '不明なエラーです。管理者に問い合わせてください。', loading: false })
-            }
-            console.log(error.config);
-          });
-      } else {
-        const geterror = '年 および 月は入力必須です。'
-        this.setState({ geterror, loading: false }); // validation NGのときのエラーメッセージ
-      }
+              console.log(error.config);
+              reject()
+            });
+        } else {
+          const geterror = '年 および 月は入力必須です。'
+          this.setState({ geterror, loading: false }); // validation NGのときのエラーメッセージ
+          resolve()
+        }
+      })
     })
+  }
+
+  setDailySchedules = (value) => {
+    this.setState({ date: value })
+    if (typeof this.state.monthlyData[value.getDate()] !== "undefined") {
+      this.setState({ dailyData: this.state.monthlyData[value.getDate()], details: [] })
+    } else {
+      this.setState({ dailyData: [], details: [] })
+    }
   }
 
   changePostDate(e) {
@@ -170,15 +191,6 @@ class Calendar extends Component {
 
     // 以下、各日のスケジュール表示用
     // ===ココカラ===
-    const setDailySchedules = (value) => {
-      this.setState({ date: value })
-      if (typeof this.state.monthlyData[value.getDate()] !== "undefined") {
-        this.setState({ dailyData: this.state.monthlyData[value.getDate()], details: [] })
-      } else {
-        this.setState({ dailyData: [], details: [] })
-      }
-    }
-
     const toggleDetails = (index) => {
       const position = this.state.details.indexOf(index)
       let newDetails = this.state.details.slice()
@@ -208,13 +220,23 @@ class Calendar extends Component {
         this.setState({
           postdata: {date: '', title: '', started_at: '', ended_at: '', allday: false, detail: ''},
           addModal: !this.state.addModal,
-          posterror: ''
+          posterror: '',
+          dateChecked: false,
+          titleChecked: false,
+          fromChecked: false,
+          toChecked: false,
+          detailChecked: false
         })
       } else {
         this.setState({
           postdata: {date: this.state.date.getFullYear()+'-'+('0'+(this.state.date.getMonth() + 1)).slice(-2)+'-'+('0'+this.state.date.getDate()).slice(-2), title: '', started_at: '', ended_at: '', allday: false, detail: ''},
           addModal: !this.state.addModal,
-          posterror: ''
+          posterror: '',
+          dateChecked: false,
+          titleChecked: false,
+          fromChecked: false,
+          toChecked: false,
+          detailChecked: false
         })
       }
     }
@@ -230,12 +252,12 @@ class Calendar extends Component {
           .then((results) => {
             console.log(results.data);
             this.setState(
-              {posterror: '' },
-              () => this.getSchedules(),
-              setDailySchedules(this.state.date),
-              console.log(this.state.dailyData),
+              {posterror: '' }
+            );
+            this.getSchedules().then((next) => {
+              this.setDailySchedules(this.state.date)
               changeAddModal()
-            )
+            })
           },)
           .catch((error) => {
             if (error.response) {
@@ -319,7 +341,6 @@ class Calendar extends Component {
         <p>name:<span style={{color:'#ff0000'}}>{this.state.name}</span></p>
         <p>email:<span style={{color:'#ff0000'}}>{this.state.email}</span></p>
         <p>password:<span style={{color:'#ff0000'}}>{this.state.password}</span></p>
-        <p>selectedYM:<span style={{color:'#ff0000'}}>{this.state.selectedYM[0]}/{this.state.selectedYM[1]}</span></p>
         {this.state.geterror != '' && <p style={{color:'#ff0000'}}>{this.state.geterror}</p>}
         {/* ===ココマデ（共通ヘッダができるまでの確認用）=== */}
         <CRow>
@@ -336,9 +357,10 @@ class Calendar extends Component {
                       minDate={new Date(1960,12,31)}
                       minDetail='decade'
                       onActiveStartDateChange={onActiveStartDateChangeFunc}
-                      onClickDay={setDailySchedules}
+                      onClickDay={this.setDailySchedules}
                       showNeighboringMonth={false}
                       tileContent={getTileContent}
+                      tileClassName={({ activeStartDate, date, view }) => view === 'month' && date.getDay() === 6 ? 'saturday' : (view === 'month' && date.getDay() === 0 ? 'sunday' : null)}
                     />
                   </main>
                 </div>
@@ -412,7 +434,7 @@ class Calendar extends Component {
                       (item, index)=>{
                         return (
                           <CCollapse show={this.state.details.includes(index)}>
-                            <ScheduleDetail item={item} url_schedules={this.state.url_schedules} getSchedules={this.getSchedules.bind(this)} setDailySchedules={setDailySchedules.bind(this)} validationCheck={validationCheck.bind(this)} date={this.state.date} email={this.state.email} password={this.state.password} />
+                            <ScheduleDetail item={item} url_schedules={this.state.url_schedules} getSchedules={this.getSchedules.bind(this)} setDailySchedules={this.setDailySchedules.bind(this)} validationCheck={validationCheck.bind(this)} date={this.state.date} email={this.state.email} password={this.state.password} />
                           </CCollapse>
                         )
                       }
@@ -435,14 +457,14 @@ class Calendar extends Component {
           <CModalBody>
             {this.state.posterror != '' && <p style={{color:'#ff0000'}}>{this.state.posterror}</p>}
             <CForm>
-              <CFormGroup className={this.state.emailChecked && "was-validated"}>
+              <CFormGroup className={this.state.dateChecked && "was-validated"}>
                 <CInputGroup className="mb-3">
                   <CInputGroupPrepend>
                     <CInputGroupText>
                       Date
                     </CInputGroupText>
                   </CInputGroupPrepend>
-                  <CInput type="date" className="form-control-warning" id="inputWarning1i" value={this.state.postdata.date} onChange={this.changePostDate.bind(this)} onBlur={() => this.setState({emailChecked: true})} required />
+                  <CInput type="date" className="form-control-warning" id="inputWarning1i" value={this.state.postdata.date} onChange={this.changePostDate.bind(this)} onBlur={() => this.setState({dateChecked: true})} required />
                   <CInvalidFeedback className="help-block">
                     Neccessary
                   </CInvalidFeedback>
@@ -451,14 +473,14 @@ class Calendar extends Component {
                   </CValidFeedback>
                 </CInputGroup>
               </CFormGroup>
-              <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+              <CFormGroup className={this.state.titleChecked && "was-validated"}>
                 <CInputGroup className="mb-4">
                   <CInputGroupPrepend>
                     <CInputGroupText>
                       Title
                     </CInputGroupText>
                   </CInputGroupPrepend>
-                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="title" value={this.state.postdata.title} onChange={this.changePostTitle.bind(this)} onBlur={() => this.setState({passwordChecked: true})} required />
+                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="title" value={this.state.postdata.title} onChange={this.changePostTitle.bind(this)} onBlur={() => this.setState({titleChecked: true})} required />
                   <CInvalidFeedback className="help-block">
                     Neccessary
                   </CInvalidFeedback>
@@ -469,14 +491,14 @@ class Calendar extends Component {
               </CFormGroup>
               <CFormGroup row className="my-0">
                 <CCol xs="8">
-                  <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+                  <CFormGroup className={this.state.fromChecked && "was-validated"}>
                     <CInputGroup className="mb-4">
                       <CInputGroupPrepend>
                         <CInputGroupText>
                           From
                         </CInputGroupText>
                       </CInputGroupPrepend>
-                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.postdata.started_at} onChange={this.changePostStartedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} disabled={this.state.postdata.allday} required />
+                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.postdata.started_at} onChange={this.changePostStartedAt.bind(this)} onBlur={() => this.setState({fromChecked: true})} disabled={this.state.postdata.allday} required />
                       <CInvalidFeedback className="help-block">
                         Neccessary
                       </CInvalidFeedback>
@@ -485,14 +507,14 @@ class Calendar extends Component {
                       </CValidFeedback>
                     </CInputGroup>
                   </CFormGroup>
-                  <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+                  <CFormGroup className={this.state.toChecked && "was-validated"}>
                     <CInputGroup className="mb-4">
                       <CInputGroupPrepend>
                         <CInputGroupText>
                           To
                         </CInputGroupText>
                       </CInputGroupPrepend>
-                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.postdata.ended_at} onChange={this.changePostEndedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} disabled={this.state.postdata.allday} required />
+                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.postdata.ended_at} onChange={this.changePostEndedAt.bind(this)} onBlur={() => this.setState({toChecked: true})} disabled={this.state.postdata.allday} required />
                       <CInvalidFeedback className="help-block">
                         Neccessary
                       </CInvalidFeedback>
@@ -516,14 +538,14 @@ class Calendar extends Component {
                   </CInputGroup>
                 </CCol>
               </CFormGroup>
-              <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+              <CFormGroup className={this.state.detailChecked && "was-validated"}>
                 <CInputGroup className="mb-4">
                   <CInputGroupPrepend>
                     <CInputGroupText>
                       Detail
                     </CInputGroupText>
                   </CInputGroupPrepend>
-                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="detail" value={this.state.postdata.detail} onChange={this.changePostDetail.bind(this)} onBlur={() => this.setState({passwordChecked: true})} />
+                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="detail" value={this.state.postdata.detail} onChange={this.changePostDetail.bind(this)} onBlur={() => this.setState({detailChecked: true})} />
                   <CInvalidFeedback className="help-block">
                     Neccessary
                   </CInvalidFeedback>

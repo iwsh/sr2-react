@@ -33,6 +33,11 @@ class ScheduleDetail extends Component {
       putdata: {date: this.props.item.date, title: this.props.item.title, started_at: this.props.item.started_at, ended_at: this.props.item.ended_at, allday: this.props.item.allday, detail: this.props.item.detail},
       editModal: false,
       deleteModal: false,
+      dateChecked: false,
+      titleChecked: false,
+      fromChecked: false,
+      toChecked: false,
+      detailChecked: false,
     };
   }
 
@@ -48,11 +53,12 @@ class ScheduleDetail extends Component {
         .then((results) => {
           console.log(results.data);
           this.setState(
-            {error: '' },
-            () => this.props.getSchedules(),
-            this.props.setDailySchedules(this.props.date),
+            {error: '' }
+          );
+          this.props.getSchedules().then((next) => {
+            this.props.setDailySchedules(this.props.date)
             changeDeleteModal()
-          )
+          })
         },)
         .catch((error) => {
           if (error.response) {
@@ -94,11 +100,12 @@ class ScheduleDetail extends Component {
           .then((results) => {
             console.log(results.data);
             this.setState(
-              {error: '' },
-              () => this.props.getSchedules(),
-              this.props.setDailySchedules(this.props.date),
+              {error: '' }
+            );
+            this.props.getSchedules().then((next) => {
+              this.props.setDailySchedules(this.props.date)
               changeEditModal()
-            )
+            })
           },)
           .catch((error) => {
             if (error.response) {
@@ -141,7 +148,12 @@ class ScheduleDetail extends Component {
       this.setState({
         putdata: {date: this.props.item.date, title: this.props.item.title, started_at: this.props.item.started_at, ended_at: this.props.item.ended_at, allday: this.props.item.allday, detail: this.props.item.detail},
         editModal: !this.state.editModal,
-        error: ''
+        error: '',
+        dateChecked: false,
+        titleChecked: false,
+        fromChecked: false,
+        toChecked: false,
+        detailChecked: false
       })
     }
 
@@ -202,14 +214,14 @@ class ScheduleDetail extends Component {
           <CModalBody>
             {this.state.error != '' && <p style={{color:'#ff0000'}}>{this.state.error}</p>}
             <CForm>
-              <CFormGroup className={this.state.emailChecked && "was-validated"}>
+              <CFormGroup className={this.state.dateChecked && "was-validated"}>
                 <CInputGroup className="mb-3">
                   <CInputGroupPrepend>
                     <CInputGroupText>
                       Date
                     </CInputGroupText>
                   </CInputGroupPrepend>
-                  <CInput type="date" className="form-control-warning" id="inputWarning1i" value={this.state.putdata.date} onChange={changePutDate.bind(this)} onBlur={() => this.setState({emailChecked: true})} required />
+                  <CInput type="date" className="form-control-warning" id="inputWarning1i" value={this.state.putdata.date} onChange={changePutDate.bind(this)} onBlur={() => this.setState({dateChecked: true})} required />
                   <CInvalidFeedback className="help-block">
                     Neccessary
                   </CInvalidFeedback>
@@ -218,14 +230,14 @@ class ScheduleDetail extends Component {
                   </CValidFeedback>
                 </CInputGroup>
               </CFormGroup>
-              <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+              <CFormGroup className={this.state.titleChecked && "was-validated"}>
                 <CInputGroup className="mb-4">
                   <CInputGroupPrepend>
                     <CInputGroupText>
                       Title
                     </CInputGroupText>
                   </CInputGroupPrepend>
-                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="title" value={this.state.putdata.title} onChange={changePutTitle.bind(this)} onBlur={() => this.setState({passwordChecked: true})} required />
+                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="title" value={this.state.putdata.title} onChange={changePutTitle.bind(this)} onBlur={() => this.setState({titleChecked: true})} required />
                   <CInvalidFeedback className="help-block">
                     Neccessary
                   </CInvalidFeedback>
@@ -236,14 +248,14 @@ class ScheduleDetail extends Component {
               </CFormGroup>
               <CFormGroup row className="my-0">
                 <CCol xs="8">
-                  <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+                  <CFormGroup className={this.state.fromChecked && "was-validated"}>
                     <CInputGroup className="mb-4">
                       <CInputGroupPrepend>
                         <CInputGroupText>
                           From
                         </CInputGroupText>
                       </CInputGroupPrepend>
-                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.putdata.started_at} onChange={changePutStartedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} disabled={this.state.putdata.allday} required />
+                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.putdata.started_at} onChange={changePutStartedAt.bind(this)} onBlur={() => this.setState({fromChecked: true})} disabled={this.state.putdata.allday} required />
                       <CInvalidFeedback className="help-block">
                         Neccessary
                       </CInvalidFeedback>
@@ -252,14 +264,14 @@ class ScheduleDetail extends Component {
                       </CValidFeedback>
                     </CInputGroup>
                   </CFormGroup>
-                  <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+                  <CFormGroup className={this.state.toChecked && "was-validated"}>
                     <CInputGroup className="mb-4">
                       <CInputGroupPrepend>
                         <CInputGroupText>
                           To
                         </CInputGroupText>
                       </CInputGroupPrepend>
-                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.putdata.ended_at} onChange={changePutEndedAt.bind(this)} onBlur={() => this.setState({passwordChecked: true})} disabled={this.state.putdata.allday} required />
+                      <CInput type="time" className="form-control-warning" id="inputWarning2i" value={this.state.putdata.ended_at} onChange={changePutEndedAt.bind(this)} onBlur={() => this.setState({toChecked: true})} disabled={this.state.putdata.allday} required />
                       <CInvalidFeedback className="help-block">
                         Neccessary
                       </CInvalidFeedback>
@@ -283,14 +295,14 @@ class ScheduleDetail extends Component {
                   </CInputGroup>
                 </CCol>
               </CFormGroup>
-              <CFormGroup className={this.state.passwordChecked && "was-validated"}>
+              <CFormGroup className={this.state.detailChecked && "was-validated"}>
                 <CInputGroup className="mb-4">
                   <CInputGroupPrepend>
                     <CInputGroupText>
                       Detail
                     </CInputGroupText>
                   </CInputGroupPrepend>
-                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="detail" value={this.state.putdata.detail} onChange={changePutDetail.bind(this)} onBlur={() => this.setState({passwordChecked: true})} />
+                  <CInput type="text" className="form-control-warning" id="inputWarning2i" placeholder="detail" value={this.state.putdata.detail} onChange={changePutDetail.bind(this)} onBlur={() => this.setState({detailChecked: true})} />
                   <CInvalidFeedback className="help-block">
                     Neccessary
                   </CInvalidFeedback>

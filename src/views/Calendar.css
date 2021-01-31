@@ -67,13 +67,10 @@
   font-size: 0.75em;
   padding: calc(0.75em / 0.75) calc(0.5em / 0.75);
 }
-.react-calendar__month-view__days__day--weekend {
-  color: #d10000;
-}
-.react-calendar__month-view__days__day--weekend1 {
+.saturday {
   color: #0000FF;
 }
-.react-calendar__month-view__days__day--weekend2 {
+.sunday {
   color: #d10000;
 }
 .react-calendar__month-view__days__day--neighboringMonth {
