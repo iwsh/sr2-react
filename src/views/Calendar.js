@@ -39,9 +39,6 @@ class Calendar extends Component {
     super(props);
     this.state = {
       url_schedules: 'http://localhost:3001/schedules',
-      name: this.props.location.state.data.name,
-      email: this.props.location.state.email,
-      password: this.props.location.state.password,
       details: [],
       date: new Date(),
       selectedYM: [(new Date()).getFullYear(), (new Date()).getMonth() + 1],
@@ -73,10 +70,12 @@ class Calendar extends Component {
       }, () => {
         let year = this.state.selectedYM[0]
         let month = this.state.selectedYM[1]
+        console.log(this.props.LoginReducer.email)
+        console.log(this.props.LoginReducer.password)
         if (year !== '' && month !== '') {
           axios
             .get(this.state.url_schedules + '/' + year + '/' + month, {
-              headers: { "Authorization": `Basic ${window.btoa(this.state.email + ":" + this.state.password)}` },
+              headers: { "Authorization": `Basic ${window.btoa(this.props.LoginReducer.email + ":" + this.props.LoginReducer.password)}` },
               data: {}
             })
             .then((results) => {
@@ -247,7 +246,7 @@ class Calendar extends Component {
       if (validation_error.length == 0) {
         axios
           .post(this.state.url_schedules, this.state.postdata, {
-            headers: { "Authorization": `Basic ${window.btoa(this.state.email + ":" + this.state.password)}` }
+            headers: { "Authorization": `Basic ${window.btoa(this.props.LoginReducer.email + ":" + this.props.LoginReducer.password)}` }
           })
           .then((results) => {
             console.log(results.data);
@@ -330,7 +329,7 @@ class Calendar extends Component {
     }
 
     return (
-      (typeof this.props.location.state.data === "undefined")? (
+      (typeof this.props.UserDataReducer.data === {})? (
         // ログイン状態（認証NG）の場合はログイン画面に転送
         <Redirect to={{ pathname: '/login' }}/>
       ) : (
@@ -338,9 +337,9 @@ class Calendar extends Component {
         <h2>Symitems Calendar</h2>
         <hr/>
         {/* ===ココカラ（共通ヘッダができるまでの確認用）=== */}
-        <p>name:<span style={{color:'#ff0000'}}>{this.state.name}</span></p>
-        <p>email:<span style={{color:'#ff0000'}}>{this.state.email}</span></p>
-        <p>password:<span style={{color:'#ff0000'}}>{this.state.password}</span></p>
+        <p>name:<span style={{color:'#ff0000'}}>{this.props.UserDataReducer.data.name}</span></p>
+        <p>email:<span style={{color:'#ff0000'}}>{this.props.LoginReducer.email}</span></p>
+        <p>password:<span style={{color:'#ff0000'}}>{this.props.LoginReducer.password}</span></p>
         {this.state.geterror != '' && <p style={{color:'#ff0000'}}>{this.state.geterror}</p>}
         {/* ===ココマデ（共通ヘッダができるまでの確認用）=== */}
         <CRow>
@@ -373,7 +372,7 @@ class Calendar extends Component {
             <CCard accentColor="success">
               <CCardHeader>
                 {this.state.date.getFullYear()}年{this.state.date.getMonth() + 1}月{this.state.date.getDate()}日（{weeks[this.state.date.getDay()]}）の予定
-                <CButton size="sm" color="success" onClick={changeAddModal} className="mr-1" className={'float-right mb-0'}>
+                <CButton size="sm" color="success" onClick={changeAddModal} className={'mr-1 float-right mb-0'}>
                   Add
                 </CButton>
               </CCardHeader>
@@ -434,7 +433,7 @@ class Calendar extends Component {
                       (item, index)=>{
                         return (
                           <CCollapse show={this.state.details.includes(index)}>
-                            <ScheduleDetail item={item} url_schedules={this.state.url_schedules} getSchedules={this.getSchedules.bind(this)} setDailySchedules={this.setDailySchedules.bind(this)} validationCheck={validationCheck.bind(this)} date={this.state.date} email={this.state.email} password={this.state.password} />
+                            <ScheduleDetail item={item} url_schedules={this.state.url_schedules} getSchedules={this.getSchedules.bind(this)} setDailySchedules={this.setDailySchedules.bind(this)} validationCheck={validationCheck.bind(this)} date={this.state.date} email={this.props.LoginReducer.email} password={this.props.LoginReducer.password} />
                           </CCollapse>
                         )
                       }

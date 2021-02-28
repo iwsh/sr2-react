@@ -29,7 +29,6 @@ class Login extends Component {
       email: '',
       password: '',
       isLoggedIn: false,
-      data: [],
       error: '',
       emailChecked: false,
       passwordChecked: false,
@@ -55,9 +54,11 @@ class Login extends Component {
         .then((results) => {
           console.log(results.data);
           this.setState({
-            data: results.data,
             isLoggedIn: true,
           });
+          this.props.handleSetUserData(results.data);
+          this.props.handleSetPassword(password);
+          this.props.handleSetEmail(email);
         },)
         .catch((error) => {
           if (error.response) {
@@ -115,9 +116,9 @@ class Login extends Component {
     return (
       (this.state.isLoggedIn === true)? (
         // ログイン状態（認証OK）の場合はカレンダー画面に転送（ユーザデータを渡す）
+        console.log(this.props.UserDataReducer.data),
         <Redirect to={{
-          pathname: '/calendar',
-          state: { data: this.state.data, email: this.state.email, password: this.state.password }
+          pathname: '/calendar'
         }}/>
       ) : (
       <div className="c-app c-default-layout flex-row align-items-center">
@@ -127,6 +128,8 @@ class Login extends Component {
               <CCardGroup>
                 <CCard className="p-4">
                   <CCardBody>
+                  <p>email:<span style={{color:'#ff0000'}}>{this.props.LoginReducer.email}</span></p>
+                  <p>password:<span style={{color:'#ff0000'}}>{this.props.LoginReducer.password}</span></p>
                   {this.state.error != '' && <p style={{color:'#ff0000'}}>{this.state.error}</p>}
                     <CForm>
                       <h1>Login</h1>

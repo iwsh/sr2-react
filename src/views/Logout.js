@@ -5,8 +5,8 @@ class Logout extends Component {
     constructor(props) {
         super(props);
         this.state = {
-          email: this.props.location.state.email,
-          password: this.props.location.state.password,
+          email: this.props.LoginReducer.email,
+          password: this.props.LoginReducer.password,
         };
       }
 
@@ -15,10 +15,8 @@ class Logout extends Component {
     }
 
     clearUser() {
-        this.setState({
-            email: '',
-            password: '',
-        });
+      this.props.handleDeleteEmail();
+      this.props.handleDeletePassword();
     }
 
     render() {

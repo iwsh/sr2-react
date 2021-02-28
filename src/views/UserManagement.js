@@ -7,8 +7,8 @@ class UserManagement extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      email: 'gerounnko@gmail.com',
-      password: 'gerounnko',
+      email: this.props.LoginReducer.email,
+      password: this.props.LoginReducer.password,
     };
   }
 

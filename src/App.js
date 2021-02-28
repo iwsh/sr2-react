@@ -20,10 +20,12 @@ class App extends Component {
         <Router>
           <React.Suspense fallback={loading}>
             <Switch>
-              <Route exact path="/login" name="Login Page" component={Login} />
-              <Route exact path="/calendar" name="Calendar Page" component={Calendar} />
-              <Route exact path="/userManagement" name="UserManagement Page" component={UserManagement} />
-              <Route exact path="/logout" name="Logout Page" component={Logout} />
+              {/* <Route exact path="/login" name="Login Page" component={Login} /> */}
+              {/* <Route exact path="/login" name="Login Page" render={() => <Login {...this.props} />} /> */}
+              <Route exact path="/login" name="Login Page" children={ <Login {...this.props} />} />
+              <Route exact path="/calendar" name="Calendar Page" children={ <Calendar {...this.props} />} />
+              <Route exact path="/userManagement" name="UserManagement Page" children={() => <UserManagement {...this.props} />} />
+              <Route exact path="/logout" name="Logout Page" children={() => <Logout {...this.props} />} />
             </Switch>
           </React.Suspense>
         </Router>
